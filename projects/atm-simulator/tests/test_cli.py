@@ -36,6 +36,7 @@ class TerminalTests(unittest.TestCase):
 
     def test_third_wrong_pin_ends_login(self):
         result = invoke(DEMO_PIN, "9999", "9999", "9999", DEMO_PIN, "1")
+        self.assertEqual(result.returncode, 1)
         self.assertIn("Too many attempts.", result.stdout)
         self.assertNotIn("Balance:", result.stdout)
 
@@ -123,9 +124,10 @@ class TerminalTests(unittest.TestCase):
         self.assertIn("Withdrawal -0.05 | balance 9999.95", output)
 
     def test_exhausted_unlock_attempts_end_the_session(self):
-        output = self.session("6", "bad", "bad", "bad", DEMO_PIN, "1")
-        self.assertIn("Too many attempts.", output)
-        self.assertNotIn("Balance:", output)
+        result = invoke(DEMO_PIN, DEMO_PIN, "6", "bad", "bad", "bad", DEMO_PIN, "1")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Too many attempts.", result.stdout)
+        self.assertNotIn("Balance:", result.stdout)
 
     def test_unlock_requires_the_changed_pin(self):
         output = self.session("3", DEMO_PIN, "0007", "0007", "6", DEMO_PIN, "0007", "1")

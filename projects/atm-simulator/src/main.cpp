@@ -36,5 +36,5 @@ int main(int argc, char* argv[]) {
         if (!value) return usage_error("Expected a nonnegative decimal amount with at most two fractional digits.");
     }
     atm::Account account{opening.value_or(1'000'000), cash_limit};
-    atm::run_session(std::cin, std::cout, account);
+    return atm::run_session(std::cin, std::cout, account) == atm::SessionExit::closed ? 0 : 1;
 }

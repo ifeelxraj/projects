@@ -12,14 +12,25 @@
 namespace atm {
 namespace {
 
+enum class SignIn { accepted, closed, attempts_exhausted };
+enum class MenuExit { close, lock };
+
 class Terminal {
 public:
     Terminal(std::istream& input, std::ostream& output, Account& account)
         : input_(input), output_(output), account_(account) {}
 
-    void run() {
+    SessionExit run() {
         auto pin = choose_pin();
-        if (pin && authenticate(*pin)) show_menu(*pin);
+        if (!pin) return SessionExit::closed;
+        for (;;) {
+            switch (authenticate(*pin)) {
+                case SignIn::closed: return SessionExit::closed;
+                case SignIn::attempts_exhausted: return SessionExit::attempts_exhausted;
+                case SignIn::accepted: break;
+            }
+            if (show_menu(*pin) == MenuExit::close) return SessionExit::closed;
+        }
     }
 
 private:
@@ -41,15 +52,15 @@ private:
         }
     }
 
-    bool authenticate(std::string_view pin) {
+    SignIn authenticate(std::string_view pin) {
         for (int attempt = 0; attempt < 3; ++attempt) {
             const auto entered = prompt("Enter PIN: ");
-            if (!entered) return false;
-            if (*entered == pin) return true;
+            if (!entered) return SignIn::closed;
+            if (*entered == pin) return SignIn::accepted;
             output_ << "Wrong PIN.\n";
         }
         output_ << "Too many attempts. Session ended.\n";
-        return false;
+        return SignIn::attempts_exhausted;
     }
 
     std::optional<std::string> cancellable_prompt(std::string_view question) {
@@ -140,13 +151,13 @@ private:
         }
     }
 
-    void show_menu(std::string& pin) {
+    MenuExit show_menu(std::string& pin) {
         constexpr std::string_view menu =
             "1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n"
             "5) Recent transactions\n6) Lock session\n0) Exit\nChoice: ";
         for (;;) {
             const auto choice = prompt(menu);
-            if (!choice || *choice == "0") return;
+            if (!choice || *choice == "0") return MenuExit::close;
             if (*choice == "1") {
                 output_ << "Balance: " << format_amount(account_.balance()) << '\n';
                 show_allowance();
@@ -156,7 +167,7 @@ private:
             else if (*choice == "5") show_statement();
             else if (*choice == "6") {
                 output_ << "Session locked. Sign in to continue.\n";
-                if (!authenticate(pin)) return;
+                return MenuExit::lock;
             } else output_ << "Invalid choice.\n";
         }
     }
@@ -168,8 +179,8 @@ private:
 
 }  // namespace
 
-void run_session(std::istream& input, std::ostream& output, Account& account) {
-    Terminal(input, output, account).run();
+SessionExit run_session(std::istream& input, std::ostream& output, Account& account) {
+    return Terminal(input, output, account).run();
 }
 
 }  // namespace atm
