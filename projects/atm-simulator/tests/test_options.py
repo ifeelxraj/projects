@@ -36,3 +36,20 @@ class StartupOptionsTests(unittest.TestCase):
                 result = invoke(DEMO_PIN, DEMO_PIN, "1", "0", args=("--opening-balance", amount))
                 self.assertEqual(result.returncode, 0)
                 self.assertIn(f"Balance: {amount}\n", result.stdout)
+
+    def test_allowance_survives_deposit_and_reauthentication(self):
+        result = invoke(
+            DEMO_PIN, DEMO_PIN, "2", "0.03", "4", "1", "6", DEMO_PIN,
+            "2", "0.03", "2", "0.02", "1", "5", "0",
+            args=("--cash-limit", "0.05", "--opening-balance", "1"),
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("exceeds the remaining cash allowance", result.stdout)
+        self.assertIn("Cash allowance left: 0.00", result.stdout)
+        self.assertIn("Balance: 1.95", result.stdout)
+        self.assertEqual(result.stdout.count("Withdrawal -"), 2)
+
+    def test_zero_allowance_blocks_only_withdrawals(self):
+        result = invoke(DEMO_PIN, DEMO_PIN, "4", "2", "2", "0.01", "1", args=("--cash-limit", "0"))
+        self.assertIn("Cash allowance left: 0.00", result.stdout)
+        self.assertIn("Balance: 10002.00", result.stdout)

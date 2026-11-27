@@ -84,6 +84,12 @@ private:
         output_ << "Pin changed successfully.\n";
     }
 
+    void show_allowance() {
+        if (auto remaining = account_.cash_remaining()) {
+            output_ << "Cash allowance left: " << format_amount(*remaining) << '\n';
+        }
+    }
+
     void transact(Movement type) {
         const bool debit = type == Movement::withdrawal;
         const auto text = cancellable_prompt(debit ? "Amount to withdraw (blank to cancel): "
@@ -107,11 +113,13 @@ private:
                 return;
             case Result::cash_limit:
                 output_ << "Withdrawal exceeds the remaining cash allowance.\n";
+                show_allowance();
                 return;
             case Result::ok: break;
         }
         output_ << (debit ? "Withdrawal amount: " : "Deposit amount: ") << format_amount(*amount) << '\n';
         output_ << "Remaining balance: " << format_amount(account_.balance()) << '\n';
+        if (debit) show_allowance();
     }
 
     void show_statement() {
@@ -139,8 +147,10 @@ private:
         for (;;) {
             const auto choice = prompt(menu);
             if (!choice || *choice == "0") return;
-            if (*choice == "1") output_ << "Balance: " << format_amount(account_.balance()) << '\n';
-            else if (*choice == "2") transact(Movement::withdrawal);
+            if (*choice == "1") {
+                output_ << "Balance: " << format_amount(account_.balance()) << '\n';
+                show_allowance();
+            } else if (*choice == "2") transact(Movement::withdrawal);
             else if (*choice == "3") change_pin(pin);
             else if (*choice == "4") transact(Movement::deposit);
             else if (*choice == "5") show_statement();

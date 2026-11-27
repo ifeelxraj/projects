@@ -22,3 +22,7 @@ program. The checks do not require any Python packages.
 
 For a smaller practice account, run `./build/atm --opening-balance 25.50`.
 Run `./build/atm --help` to see the startup options without signing in.
+
+Add `--cash-limit 10.00` to cap **total** withdrawals at `10.00` for the
+whole run. Deposits and locking the terminal do not replenish the allowance.
+Leave the option out to run without a cap.
