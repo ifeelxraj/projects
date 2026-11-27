@@ -105,6 +105,9 @@ private:
             case Result::balance_limit:
                 output_ << "Deposit would exceed the balance limit.\n";
                 return;
+            case Result::cash_limit:
+                output_ << "Withdrawal exceeds the remaining cash allowance.\n";
+                return;
             case Result::ok: break;
         }
         output_ << (debit ? "Withdrawal amount: " : "Deposit amount: ") << format_amount(*amount) << '\n';
