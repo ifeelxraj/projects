@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <deque>
 #include <limits>
+#include <optional>
 
 namespace atm {
 
@@ -28,6 +29,9 @@ public:
     // Retained entries are in posting order (oldest first).
     const std::deque<Transaction>& history() const { return history_; }
 
+    // Set only after eviction: the balance immediately before the first retained entry.
+    std::optional<Cents> carried_balance() const { return carried_balance_; }
+
     Result deposit(Cents amount) {
         if (amount == 0) return Result::zero_amount;
         if (amount > std::numeric_limits<Cents>::max() - balance_) return Result::balance_limit;
@@ -43,13 +47,17 @@ public:
 private:
     Result post(Movement type, Cents amount, Cents after) {
         history_.push_back({type, amount, after});
-        if (history_.size() > history_limit) history_.pop_front();
+        if (history_.size() > history_limit) {
+            carried_balance_ = history_.front().balance_after;
+            history_.pop_front();
+        }
         balance_ = after;
         return Result::ok;
     }
 
     Cents balance_;
     std::deque<Transaction> history_;
+    std::optional<Cents> carried_balance_;
 };
 
 }  // namespace atm

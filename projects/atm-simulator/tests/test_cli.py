@@ -123,3 +123,10 @@ class TerminalTests(unittest.TestCase):
             output.index("Deposit +0.50 | balance 9999.25"),
             output.index("Withdrawal -1.25 | balance 9998.75"),
         )
+
+    def test_statement_discloses_truncation_only_after_eviction(self):
+        ten_deposits = ("4", "0.01") * 10
+        output = self.session(*ten_deposits, "5", "4", "0.02", "5")
+        self.assertEqual(output.count("balance carried forward:"), 1)
+        self.assertIn("balance carried forward: 10000.01", output)
+        self.assertEqual(output.count("Deposit +"), 20)

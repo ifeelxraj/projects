@@ -95,6 +95,10 @@ void show_statement(const atm::Account& account) {
                   << atm::format_amount(row->amount) << " | balance "
                   << atm::format_amount(row->balance_after) << '\n';
     }
+    if (auto prior = account.carried_balance()) {
+        std::cout << "Earlier transactions omitted; balance carried forward: "
+                  << atm::format_amount(*prior) << '\n';
+    }
 }
 
 void show_menu(atm::Account& account, std::string& pin) {
