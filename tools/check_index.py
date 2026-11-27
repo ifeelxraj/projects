@@ -11,13 +11,23 @@ PROJECT_LINK = re.compile(r"\[[^\]]+\]\((?:\./)?projects/([^/()\s]+)(?:/(?:READM
 
 
 def index_errors(markdown, has_readme):
-    """The table uses a local link in column one and a status in the last column."""
+    """Use the named Status column, not an arbitrary last nonempty cell."""
     errors = []
     listed = set()
+    status_col = None
     for number, line in enumerate(markdown.splitlines(), 1):
-        if not line.strip().startswith("|"):
+        row = line.strip()
+        if not row.startswith("|"):
+            status_col = None
             continue
-        cells = [part.strip() for part in line.strip().strip("|").split("|")]
+        body = row[1:]
+        if body.endswith("|"):
+            body = body[:-1]
+        cells = [part.strip() for part in body.split("|")]
+        if cells[0].casefold() == "project":
+            headings = [cell.casefold() for cell in cells]
+            status_col = headings.index("status") if "status" in headings else None
+            continue
         link = PROJECT_LINK.fullmatch(cells[0])
         if not link:
             continue
@@ -27,7 +37,7 @@ def index_errors(markdown, has_readme):
         listed.add(name)
         if name not in has_readme:
             errors.append(f"README.md:{number}: no projects/{name}/ directory")
-        if len(cells) < 2 or not cells[-1]:
+        if status_col is None or status_col >= len(cells) or not cells[status_col]:
             errors.append(f"README.md:{number}: missing status for {name}")
 
     for name in sorted(has_readme):
