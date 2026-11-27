@@ -69,7 +69,11 @@ void withdraw()
 {
     int amount;
     cout << "Enter amount to withdraw: ";
-    cin >> amount;
+    if (!(cin >> amount) || amount <= 0)
+    {
+        cout << "Enter a positive amount.\n";
+        return;
+    }
     
     if (amount > balance)
     {

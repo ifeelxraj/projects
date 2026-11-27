@@ -36,3 +36,10 @@ class TerminalTests(unittest.TestCase):
 
     def test_refuses_overdraft(self):
         self.assertIn("insufficient balance", self.session("2", "10001").lower())
+
+    def test_rejects_nonpositive_or_unreadable_amounts(self):
+        for value in ("0", "-50", "abc"):
+            with self.subTest(value=value):
+                output = self.session("2", value)
+                self.assertIn("positive amount", output)
+                self.assertNotIn("Remaining balance:", output)
