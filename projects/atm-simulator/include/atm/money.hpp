@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <string>
 #include <string_view>
 
 namespace atm {
@@ -33,6 +34,11 @@ inline std::optional<Cents> parse_amount(std::string_view text) {
         if (!append_digit('0')) return std::nullopt;
     }
     return value;
+}
+
+inline std::string format_amount(Cents cents) {
+    const auto fraction = cents % 100;
+    return std::to_string(cents / 100) + (fraction < 10 ? ".0" : ".") + std::to_string(fraction);
 }
 
 }  // namespace atm

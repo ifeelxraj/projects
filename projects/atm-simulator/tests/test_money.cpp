@@ -2,7 +2,14 @@
 #include "check.hpp"
 
 int main() {
+    using atm::format_amount;
     using atm::parse_amount;
+    CHECK(format_amount(0) == "0.00");
+    CHECK(format_amount(9) == "0.09");
+    CHECK(format_amount(210) == "2.10");
+    const auto largest = std::numeric_limits<atm::Cents>::max();
+    CHECK(format_amount(largest) == "184467440737095516.15");
+    CHECK(parse_amount(format_amount(largest)) == largest);
     CHECK(parse_amount("0") == 0);
     CHECK(parse_amount("17") == 1700);
     CHECK(parse_amount("0003.5") == 350);
