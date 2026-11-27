@@ -53,3 +53,11 @@ class TerminalTests(unittest.TestCase):
         result = invoke("9999", "9999", "9999", DEMO_PIN, "1")
         self.assertIn("Too many attempts.", result.stdout)
         self.assertNotIn("Balance:", result.stdout)
+
+    def test_change_accepts_a_leading_zero(self):
+        self.assertIn("Pin changed successfully", self.session("3", DEMO_PIN, "0007"))
+
+    def test_change_requires_a_different_four_digit_pin(self):
+        for pin in ("123", "12345", "12a4", DEMO_PIN):
+            with self.subTest(pin=pin):
+                self.assertIn("different four-digit PIN", self.session("3", DEMO_PIN, pin))

@@ -1,12 +1,15 @@
+#include "atm/pin.hpp"
+
 #include <iostream>
+#include <string>
 using namespace std;
 
-int pin = 2486;
+string pin = "2486";
 int balance = 10000;
 
 void pinchange()
 {
-    int enteredpin, newpin;
+    string enteredpin, newpin;
     cout << "Enter Current Pin: ";
     if (!(cin >> enteredpin) || enteredpin != pin)
     {
@@ -14,9 +17,9 @@ void pinchange()
         return;
     }
     cout << "Generate New Pin: ";
-    if (!(cin >> newpin) || newpin == pin)
+    if (!(cin >> newpin) || !atm::valid_pin(newpin) || newpin == pin)
     {
-        cout << "Choose a different PIN.\n";
+        cout << "Choose a different four-digit PIN.\n";
         return;
     }
     pin = newpin;
@@ -81,7 +84,7 @@ void login()
 {
     for (int attempt = 0; attempt < 3; ++attempt)
     {
-        int entered;
+        string entered;
         cout << "Enter Pin: ";
         if (!(cin >> entered)) return;
         if (pin == entered)
