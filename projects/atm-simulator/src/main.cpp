@@ -83,14 +83,29 @@ void transact(atm::Account& account, atm::Movement type) {
     std::cout << "Remaining balance: " << atm::format_amount(account.balance()) << '\n';
 }
 
+void show_statement(const atm::Account& account) {
+    const auto& history = account.history();
+    if (history.empty()) {
+        std::cout << "No transactions yet.\n";
+        return;
+    }
+    std::cout << "Recent transactions (newest first):\n";
+    for (auto row = history.rbegin(); row != history.rend(); ++row) {
+        std::cout << (row->type == atm::Movement::withdrawal ? "Withdrawal -" : "Deposit +")
+                  << atm::format_amount(row->amount) << " | balance "
+                  << atm::format_amount(row->balance_after) << '\n';
+    }
+}
+
 void show_menu(atm::Account& account, std::string& pin) {
     for (;;) {
-        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n0) Exit\nChoice: ");
+        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n5) Recent transactions\n0) Exit\nChoice: ");
         if (!choice || *choice == "0") return;
         if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
         else if (*choice == "2") transact(account, atm::Movement::withdrawal);
         else if (*choice == "3") change_pin(pin);
         else if (*choice == "4") transact(account, atm::Movement::deposit);
+        else if (*choice == "5") show_statement(account);
         else std::cout << "Invalid choice.\n";
     }
 }
