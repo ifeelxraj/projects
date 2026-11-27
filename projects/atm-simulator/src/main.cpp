@@ -57,10 +57,8 @@ void change_pin(std::string& pin) {
     std::cout << "Pin changed successfully.\n";
 }
 
-enum class Action { withdraw, deposit };
-
-void transact(atm::Account& account, Action action) {
-    const bool debit = action == Action::withdraw;
+void transact(atm::Account& account, atm::Movement type) {
+    const bool debit = type == atm::Movement::withdrawal;
     const auto text = prompt(debit ? "Amount to withdraw: " : "Amount to deposit: ");
     if (!text) return;
     const auto amount = atm::parse_amount(*text);
@@ -90,9 +88,9 @@ void show_menu(atm::Account& account, std::string& pin) {
         const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n0) Exit\nChoice: ");
         if (!choice || *choice == "0") return;
         if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
-        else if (*choice == "2") transact(account, Action::withdraw);
+        else if (*choice == "2") transact(account, atm::Movement::withdrawal);
         else if (*choice == "3") change_pin(pin);
-        else if (*choice == "4") transact(account, Action::deposit);
+        else if (*choice == "4") transact(account, atm::Movement::deposit);
         else std::cout << "Invalid choice.\n";
     }
 }
