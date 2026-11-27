@@ -1,0 +1,18 @@
+# ATM simulator
+
+A local C++ console exercise for checking a balance, making a withdrawal, and
+changing a demo PIN. State lives in memory for one run. This is not banking
+software and does not connect to a bank, an SMS service, or a payment system.
+
+## Build and try it
+
+From this directory, with a C++17 compiler:
+
+```sh
+mkdir -p build
+c++ -std=c++17 src/main.cpp -o build/atm
+./build/atm
+```
+
+The starter demo uses `2486` as its public sample PIN. Choose `1` at the menu
+to see the opening balance of 10000. Use fictional inputs only.
