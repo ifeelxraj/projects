@@ -103,14 +103,17 @@ void show_statement(const atm::Account& account) {
 
 void show_menu(atm::Account& account, std::string& pin) {
     for (;;) {
-        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n5) Recent transactions\n0) Exit\nChoice: ");
+        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n5) Recent transactions\n6) Lock session\n0) Exit\nChoice: ");
         if (!choice || *choice == "0") return;
         if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
         else if (*choice == "2") transact(account, atm::Movement::withdrawal);
         else if (*choice == "3") change_pin(pin);
         else if (*choice == "4") transact(account, atm::Movement::deposit);
         else if (*choice == "5") show_statement(account);
-        else std::cout << "Invalid choice.\n";
+        else if (*choice == "6") {
+            std::cout << "Session locked. Sign in to continue.\n";
+            if (!authenticate(pin)) return;
+        } else std::cout << "Invalid choice.\n";
     }
 }
 

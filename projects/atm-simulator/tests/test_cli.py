@@ -130,3 +130,14 @@ class TerminalTests(unittest.TestCase):
         self.assertEqual(output.count("balance carried forward:"), 1)
         self.assertIn("balance carried forward: 10000.01", output)
         self.assertEqual(output.count("Deposit +"), 20)
+
+    def test_lock_and_resume_preserves_balance_and_history(self):
+        output = self.session("2", "0.05", "6", DEMO_PIN, "1", "5")
+        self.assertIn("Session locked.", output)
+        self.assertIn("Balance: 9999.95", output)
+        self.assertIn("Withdrawal -0.05 | balance 9999.95", output)
+
+    def test_exhausted_unlock_attempts_end_the_session(self):
+        output = self.session("6", "bad", "bad", "bad", DEMO_PIN, "1")
+        self.assertIn("Too many attempts.", output)
+        self.assertNotIn("Balance:", output)
