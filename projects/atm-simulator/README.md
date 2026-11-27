@@ -6,11 +6,10 @@ software and does not connect to a bank, an SMS service, or a payment system.
 
 ## Build and try it
 
-From this directory, with a C++17 compiler:
+From this directory, with GNU Make and a C++17 compiler:
 
 ```sh
-mkdir -p build
-c++ -std=c++17 src/main.cpp -o build/atm
+make
 ./build/atm
 ```
 
