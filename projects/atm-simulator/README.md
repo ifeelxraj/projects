@@ -15,3 +15,6 @@ make
 
 The starter demo uses `2486` as its public sample PIN. Choose `1` at the menu
 to see the opening balance of 10000. Use fictional inputs only.
+
+Run `make test` with Python 3 installed for end-to-end checks of the compiled
+program. The checks do not require any Python packages.

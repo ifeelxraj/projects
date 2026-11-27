@@ -16,3 +16,7 @@ run: build/atm
 
 clean:
 	$(RM) -r build
+
+.PHONY: test
+test: build/atm
+	python3 -m unittest discover -s tests -p 'test_*.py'
