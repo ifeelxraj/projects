@@ -1,8 +1,10 @@
+import os
 from pathlib import Path
 import subprocess
 
 
-BINARY = Path(__file__).resolve().parents[1] / "build" / "atm"
+DEFAULT_BINARY = Path(__file__).resolve().parents[1] / "build" / "atm"
+BINARY = Path(os.environ.get("ATM_BINARY", DEFAULT_BINARY))
 DEMO_PIN = "0042"  # Made-up for this in-memory test account.
 
 

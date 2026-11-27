@@ -2,28 +2,37 @@ CXXFLAGS ?= -O2 -Wall -Wextra -Wpedantic
 SOURCES := $(wildcard src/*.cpp)
 HEADERS := $(wildcard include/atm/*.hpp src/*.hpp)
 
-.PHONY: all run clean
-all: build/atm
+ifeq ($(SANITIZE),1)
+BUILD := build/ubsan
+CHECK_FLAGS := -O1 -g -fsanitize=undefined -fno-sanitize-recover=undefined
+else
+BUILD := build
+endif
 
-build/atm: $(SOURCES) $(HEADERS) | build
-	$(CXX) $(CPPFLAGS) -Iinclude $(CXXFLAGS) -std=c++17 $(SOURCES) $(LDFLAGS) -o $@
+.PHONY: all run clean test test-ubsan
+all: $(BUILD)/atm
 
-build:
+$(BUILD)/atm: $(SOURCES) $(HEADERS) Makefile | $(BUILD)
+	$(CXX) $(CPPFLAGS) -Iinclude $(CXXFLAGS) $(CHECK_FLAGS) -std=c++17 $(SOURCES) $(LDFLAGS) -o $@
+
+$(BUILD):
 	mkdir -p $@
 
-run: build/atm
-	./build/atm
+run: $(BUILD)/atm
+	./$(BUILD)/atm
 
 clean:
 	$(RM) -r build
 
 UNIT_SOURCES := $(wildcard tests/test_*.cpp)
-UNIT_BINS := $(patsubst tests/%.cpp,build/%,$(UNIT_SOURCES))
+UNIT_BINS := $(patsubst tests/%.cpp,$(BUILD)/%,$(UNIT_SOURCES))
 
-build/%: tests/%.cpp tests/check.hpp $(HEADERS) | build
-	$(CXX) $(CPPFLAGS) -Iinclude $(CXXFLAGS) -std=c++17 $< $(LDFLAGS) -o $@
+$(BUILD)/%: tests/%.cpp tests/check.hpp $(HEADERS) Makefile | $(BUILD)
+	$(CXX) $(CPPFLAGS) -Iinclude $(CXXFLAGS) $(CHECK_FLAGS) -std=c++17 $< $(LDFLAGS) -o $@
 
-.PHONY: test
-test: build/atm $(UNIT_BINS)
+test: $(BUILD)/atm $(UNIT_BINS)
 	@set -e; for suite in $(UNIT_BINS); do echo "[test] $$suite"; ./$$suite; done
-	python3 -m unittest discover -s tests -p 'test_*.py'
+	ATM_BINARY="$(abspath $(BUILD)/atm)" python3 -m unittest discover -s tests -p 'test_*.py'
+
+test-ubsan:
+	$(MAKE) SANITIZE=1 test
