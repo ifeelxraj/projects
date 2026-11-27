@@ -141,3 +141,13 @@ class TerminalTests(unittest.TestCase):
         output = self.session("6", "bad", "bad", "bad", DEMO_PIN, "1")
         self.assertIn("Too many attempts.", output)
         self.assertNotIn("Balance:", output)
+
+    def test_unlock_requires_the_changed_pin(self):
+        output = self.session("3", DEMO_PIN, "0007", "0007", "6", DEMO_PIN, "0007", "1")
+        self.assertEqual(output.count("Wrong PIN."), 1)
+        self.assertIn("Balance: 10000.00", output)
+
+    def test_unconfirmed_pin_cannot_replace_the_original(self):
+        output = self.session("3", DEMO_PIN, "0007", "0008", "6", "0007", DEMO_PIN, "1")
+        self.assertEqual(output.count("Wrong PIN."), 1)
+        self.assertIn("Balance: 10000.00", output)
