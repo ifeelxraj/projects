@@ -1,3 +1,4 @@
+#include "atm/account.hpp"
 #include "atm/pin.hpp"
 
 #include <iostream>
@@ -5,7 +6,7 @@
 using namespace std;
 
 string pin = "2486";
-int balance = 10000;
+atm::Account account{1'000'000};
 
 void pinchange()
 {
@@ -28,30 +29,27 @@ void pinchange()
 
 void checkbalance()
 {
-    cout << "Balance: " << balance << "\n";
+    cout << "Balance: " << atm::format_amount(account.balance()) << "\n";
 }
 
 void withdraw()
 {
-    int amount;
+    string text;
     cout << "Enter amount to withdraw: ";
-    if (!(cin >> amount) || amount <= 0)
+    if (!(cin >> text)) return;
+    const auto amount = atm::parse_amount(text);
+    if (!amount || *amount == 0)
     {
-        cout << "Enter a positive amount.\n";
+        cout << "Enter a positive amount, for example 12.50.\n";
         return;
     }
-    
-    if (amount > balance)
+    if (account.withdraw(*amount) != atm::Result::ok)
     {
-        cout << "Insufficient Balance\n";
+        cout << "Insufficient balance.\n";
+        return;
     }
-    else
-    {
-        cout << "Withdraw successful\n";
-        balance = balance - amount;
-        cout << "Withdrawal amount: " << amount << "\n";
-        cout << "Remaining balance: " << balance << "\n";
-    }
+    cout << "Withdrawal amount: " << atm::format_amount(*amount) << "\n";
+    cout << "Remaining balance: " << atm::format_amount(account.balance()) << "\n";
 }
 
 void showMenu()

@@ -61,3 +61,11 @@ class TerminalTests(unittest.TestCase):
         for pin in ("123", "12345", "12a4", DEMO_PIN):
             with self.subTest(pin=pin):
                 self.assertIn("different four-digit PIN", self.session("3", DEMO_PIN, pin))
+
+    def test_fractional_withdrawal_uses_exact_cents(self):
+        output = self.session("2", "0.09")
+        self.assertIn("Withdrawal amount: 0.09", output)
+        self.assertIn("Remaining balance: 9999.91", output)
+
+    def test_does_not_round_excess_precision(self):
+        self.assertIn("positive amount", self.session("2", "0.009"))
