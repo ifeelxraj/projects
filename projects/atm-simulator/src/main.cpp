@@ -48,6 +48,11 @@ void change_pin(std::string& pin) {
         std::cout << "Choose a different four-digit PIN.\n";
         return;
     }
+    const auto confirmation = prompt("Repeat new PIN: ");
+    if (!confirmation || *confirmation != *next) {
+        std::cout << "PIN not changed: confirmation did not match.\n";
+        return;
+    }
     pin = *next;
     std::cout << "Pin changed successfully.\n";
 }

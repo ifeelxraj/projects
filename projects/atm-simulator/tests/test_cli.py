@@ -55,7 +55,7 @@ class TerminalTests(unittest.TestCase):
         self.assertNotIn("Balance:", result.stdout)
 
     def test_change_accepts_a_leading_zero(self):
-        self.assertIn("Pin changed successfully", self.session("3", DEMO_PIN, "0007"))
+        self.assertIn("Pin changed successfully", self.session("3", DEMO_PIN, "0007", "0007"))
 
     def test_change_requires_a_different_four_digit_pin(self):
         for pin in ("123", "12345", "12a4", DEMO_PIN):
@@ -86,3 +86,13 @@ class TerminalTests(unittest.TestCase):
         result = invoke("123", "12a4", DEMO_PIN, DEMO_PIN, "1")
         self.assertEqual(result.stdout.count("Use exactly four digits"), 2)
         self.assertIn("Balance: 10000.00", result.stdout)
+
+    def test_pin_change_requires_matching_confirmation(self):
+        output = self.session("3", DEMO_PIN, "0007", "0008")
+        self.assertIn("confirmation did not match", output)
+        self.assertNotIn("changed successfully", output)
+
+    def test_wrong_current_pin_aborts_the_change(self):
+        output = self.session("3", "9999")
+        self.assertIn("PIN not changed.", output)
+        self.assertNotIn("New PIN:", output)
