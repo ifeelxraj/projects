@@ -36,3 +36,7 @@ test: $(BUILD)/atm $(UNIT_BINS)
 
 test-ubsan:
 	$(MAKE) SANITIZE=1 test
+
+.PHONY: demo
+demo: $(BUILD)/atm
+	./$(BUILD)/atm --opening-balance 25.00 --cash-limit 7.00 < examples/mini-statement.in

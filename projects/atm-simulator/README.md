@@ -26,3 +26,7 @@ Run `./build/atm --help` to see the startup options without signing in.
 Add `--cash-limit 10.00` to cap **total** withdrawals at `10.00` for the
 whole run. Deposits and locking the terminal do not replenish the allowance.
 Leave the option out to run without a cap.
+
+For a repeatable demonstration, run `make demo`. It replays the fictional
+inputs in [`examples/mini-statement.in`](examples/mini-statement.in), ending
+with a `22.55` balance and `1.80` of cash allowance left.
