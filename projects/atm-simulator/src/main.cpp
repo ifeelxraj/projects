@@ -74,12 +74,14 @@ void withdraw(atm::Account& account) {
 }
 
 void show_menu(atm::Account& account, std::string& pin) {
-    const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\nChoice: ");
-    if (!choice) return;
-    if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
-    else if (*choice == "2") withdraw(account);
-    else if (*choice == "3") change_pin(pin);
-    else std::cout << "Invalid choice.\n";
+    for (;;) {
+        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n0) Exit\nChoice: ");
+        if (!choice || *choice == "0") return;
+        if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
+        else if (*choice == "2") withdraw(account);
+        else if (*choice == "3") change_pin(pin);
+        else std::cout << "Invalid choice.\n";
+    }
 }
 
 }  // namespace

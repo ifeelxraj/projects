@@ -96,3 +96,9 @@ class TerminalTests(unittest.TestCase):
         output = self.session("3", "9999")
         self.assertIn("PIN not changed.", output)
         self.assertNotIn("New PIN:", output)
+
+    def test_one_login_supports_several_actions_until_exit(self):
+        output = self.session("2", "10.01", "bad", "1", "0", "2", "5")
+        self.assertIn("Invalid choice.", output)
+        self.assertIn("Balance: 9989.99", output)
+        self.assertEqual(output.count("Withdrawal amount:"), 1)
