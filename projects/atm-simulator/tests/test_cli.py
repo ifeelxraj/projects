@@ -43,3 +43,13 @@ class TerminalTests(unittest.TestCase):
                 output = self.session("2", value)
                 self.assertIn("positive amount", output)
                 self.assertNotIn("Remaining balance:", output)
+
+    def test_login_allows_a_retry(self):
+        result = invoke("9999", DEMO_PIN, "1")
+        self.assertIn("Wrong PIN.", result.stdout)
+        self.assertIn("Balance: 10000", result.stdout)
+
+    def test_third_wrong_pin_ends_login(self):
+        result = invoke("9999", "9999", "9999", DEMO_PIN, "1")
+        self.assertIn("Too many attempts.", result.stdout)
+        self.assertNotIn("Balance:", result.stdout)

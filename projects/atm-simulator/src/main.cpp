@@ -4,60 +4,23 @@ using namespace std;
 int pin = 2486;
 int balance = 10000;
 
-void forgetpin()
-{
-    int newpin;
-    cout << "OTP will be sent to your linked mobile number\n";
-    cout << "Generate New Pin: ";
-    cin >> newpin;
-    if (pin == newpin)
-    {
-        cout << "Invalid Pin, new pin cannot be same as old pin\n";
-    }
-    else
-    {
-        pin = newpin;
-        cout << "Pin changed successfully\n";
-    }
-}
-
 void pinchange()
 {
     int enteredpin, newpin;
     cout << "Enter Current Pin: ";
-    cin >> enteredpin;
-    if (pin == enteredpin)
+    if (!(cin >> enteredpin) || enteredpin != pin)
     {
-        cout << "Generate New Pin: ";
-        cin >> newpin;
-        if (pin == newpin)
-        {
-            cout << "Invalid Pin, new pin cannot be same as old pin\n";
-        }
-        else
-        {
-            pin = newpin;
-            cout << "Pin changed successfully\n";
-        }
+        cout << "PIN not changed.\n";
+        return;
     }
-    else
+    cout << "Generate New Pin: ";
+    if (!(cin >> newpin) || newpin == pin)
     {
-        cout << "Wrong Pin, Enter correct pin\n";
-        int choice;
-        cout << "1) Forget Pin\n2) Re-enter pin\n";
-        cin >> choice;
-        switch (choice)
-        {
-        case 1:
-            forgetpin();
-            break;
-        case 2:
-            pinchange();
-            break;
-        default:
-            cout << "Invalid choice\n";
-        }
+        cout << "Choose a different PIN.\n";
+        return;
     }
+    pin = newpin;
+    cout << "Pin changed successfully\n";
 }
 
 void checkbalance()
@@ -116,37 +79,19 @@ void showMenu()
 
 void login()
 {
-    int epin;
-    cout << "Enter Pin: ";
-    cin >> epin;
-    
-    if (pin == epin)
+    for (int attempt = 0; attempt < 3; ++attempt)
     {
-        showMenu();
-    }
-    else
-    {   
-        int choice;
-        cout << "Wrong Pin\n";
-        cout << "1) Forget Pin\n2) Re-enter Pin\n";
-        cout << "Enter choice: ";
-        cin >> choice;
-        
-        switch(choice)
+        int entered;
+        cout << "Enter Pin: ";
+        if (!(cin >> entered)) return;
+        if (pin == entered)
         {
-            case 1: 
-                forgetpin();
-                break;
-        
-            case 2: 
-                login();  
-                break;
-                
-            default:
-                cout << "Invalid Choice\n";
-                break;
+            showMenu();
+            return;
         }
+        cout << "Wrong PIN.\n";
     }
+    cout << "Too many attempts. Session ended.\n";
 }
 
 int main()
@@ -154,6 +99,3 @@ int main()
     login();
     return 0;
 }
-
-
-//follow me on github for such more codes @ifeelxraj.
