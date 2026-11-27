@@ -151,3 +151,10 @@ class TerminalTests(unittest.TestCase):
         output = self.session("3", DEMO_PIN, "0007", "0008", "6", "0007", DEMO_PIN, "1")
         self.assertEqual(output.count("Wrong PIN."), 1)
         self.assertIn("Balance: 10000.00", output)
+
+    def test_blank_lines_cancel_before_any_mutation(self):
+        output = self.session("2", "", "4", "  ", "3", DEMO_PIN, "0007", "", "5", "6", DEMO_PIN, "1")
+        self.assertEqual(output.count("Cancelled; no changes made."), 3)
+        self.assertIn("No transactions yet.", output)
+        self.assertNotIn("Wrong PIN.", output)
+        self.assertIn("Balance: 10000.00", output)

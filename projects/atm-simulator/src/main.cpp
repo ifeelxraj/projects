@@ -37,19 +37,31 @@ bool authenticate(std::string_view pin) {
     return false;
 }
 
+std::optional<std::string> cancellable_prompt(std::string_view question) {
+    auto answer = prompt(question);
+    if (answer && answer->empty()) {
+        std::cout << "Cancelled; no changes made.\n";
+        return std::nullopt;
+    }
+    return answer;
+}
+
 void change_pin(std::string& pin) {
-    const auto current = prompt("Current PIN: ");
-    if (!current || *current != pin) {
+    const auto current = cancellable_prompt("Current PIN (blank to cancel): ");
+    if (!current) return;
+    if (*current != pin) {
         std::cout << "PIN not changed.\n";
         return;
     }
-    const auto next = prompt("New PIN: ");
-    if (!next || !atm::valid_pin(*next) || *next == pin) {
+    const auto next = cancellable_prompt("New PIN (blank to cancel): ");
+    if (!next) return;
+    if (!atm::valid_pin(*next) || *next == pin) {
         std::cout << "Choose a different four-digit PIN.\n";
         return;
     }
-    const auto confirmation = prompt("Repeat new PIN: ");
-    if (!confirmation || *confirmation != *next) {
+    const auto confirmation = cancellable_prompt("Repeat new PIN (blank to cancel): ");
+    if (!confirmation) return;
+    if (*confirmation != *next) {
         std::cout << "PIN not changed: confirmation did not match.\n";
         return;
     }
@@ -59,7 +71,8 @@ void change_pin(std::string& pin) {
 
 void transact(atm::Account& account, atm::Movement type) {
     const bool debit = type == atm::Movement::withdrawal;
-    const auto text = prompt(debit ? "Amount to withdraw: " : "Amount to deposit: ");
+    const auto text = cancellable_prompt(debit ? "Amount to withdraw (blank to cancel): "
+                                              : "Amount to deposit (blank to cancel): ");
     if (!text) return;
     const auto amount = atm::parse_amount(*text);
     if (!amount) {
