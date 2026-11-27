@@ -13,8 +13,9 @@ make
 ./build/atm
 ```
 
-The starter demo uses `2486` as its public sample PIN. Choose `1` at the menu
-to see the opening balance of 10000. Use fictional inputs only.
+At startup, choose a made-up four-digit PIN, then enter it again to sign in.
+Leading zeroes count. The terminal does not mask your input, so **never enter
+a real PIN**. Choose `1` to see the opening balance of `10000.00`.
 
 Run `make test` with Python 3 installed for end-to-end checks of the compiled
 program. The checks do not require any Python packages.

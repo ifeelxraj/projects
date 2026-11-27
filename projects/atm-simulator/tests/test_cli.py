@@ -6,7 +6,7 @@ import unittest
 
 
 BINARY = Path(__file__).resolve().parents[1] / "build" / "atm"
-DEMO_PIN = "2486"  # Public fixture for the original classroom demo.
+DEMO_PIN = "0042"  # Made-up for this in-memory test account.
 
 
 def invoke(*lines, args=()):
@@ -22,7 +22,7 @@ def invoke(*lines, args=()):
 
 class TerminalTests(unittest.TestCase):
     def session(self, *commands):
-        result = invoke(DEMO_PIN, *commands)
+        result = invoke(DEMO_PIN, DEMO_PIN, *commands)
         self.assertEqual(result.returncode, 0, result.stderr)
         return result.stdout
 
@@ -45,12 +45,12 @@ class TerminalTests(unittest.TestCase):
                 self.assertNotIn("Remaining balance:", output)
 
     def test_login_allows_a_retry(self):
-        result = invoke("9999", DEMO_PIN, "1")
+        result = invoke(DEMO_PIN, "9999", DEMO_PIN, "1")
         self.assertIn("Wrong PIN.", result.stdout)
         self.assertIn("Balance: 10000", result.stdout)
 
     def test_third_wrong_pin_ends_login(self):
-        result = invoke("9999", "9999", "9999", DEMO_PIN, "1")
+        result = invoke(DEMO_PIN, "9999", "9999", "9999", DEMO_PIN, "1")
         self.assertIn("Too many attempts.", result.stdout)
         self.assertNotIn("Balance:", result.stdout)
 
@@ -81,3 +81,8 @@ class TerminalTests(unittest.TestCase):
 
     def test_extra_amount_tokens_are_not_a_valid_prefix(self):
         self.assertIn("positive amount", self.session("2", "1.25 extra"))
+
+    def test_setup_reprompts_until_pin_is_well_formed(self):
+        result = invoke("123", "12a4", DEMO_PIN, DEMO_PIN, "1")
+        self.assertEqual(result.stdout.count("Use exactly four digits"), 2)
+        self.assertIn("Balance: 10000.00", result.stdout)

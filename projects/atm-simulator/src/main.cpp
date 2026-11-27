@@ -17,6 +17,15 @@ std::optional<std::string> prompt(std::string_view question) {
     return line.substr(first, line.find_last_not_of(" \t\r") - first + 1);
 }
 
+std::optional<std::string> choose_pin() {
+    std::cout << "Local simulation. Use a made-up PIN; input is visible.\n";
+    for (;;) {
+        auto pin = prompt("Choose a four-digit demo PIN: ");
+        if (!pin || atm::valid_pin(*pin)) return pin;
+        std::cout << "Use exactly four digits (0-9).\n";
+    }
+}
+
 bool authenticate(std::string_view pin) {
     for (int attempt = 0; attempt < 3; ++attempt) {
         const auto entered = prompt("Enter PIN: ");
@@ -72,6 +81,6 @@ void show_menu(atm::Account& account, std::string& pin) {
 
 int main() {
     atm::Account account{1'000'000};
-    std::string pin = "2486";
-    if (authenticate(pin)) show_menu(account, pin);
+    auto pin = choose_pin();
+    if (pin && authenticate(*pin)) show_menu(account, *pin);
 }
