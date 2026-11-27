@@ -69,3 +69,15 @@ class TerminalTests(unittest.TestCase):
 
     def test_does_not_round_excess_precision(self):
         self.assertIn("positive amount", self.session("2", "0.009"))
+
+    def test_menu_consumes_one_complete_line(self):
+        output = self.session("1 extra")
+        self.assertIn("Invalid choice.", output)
+        self.assertNotIn("Balance:", output)
+
+    def test_trims_padding_and_carriage_returns(self):
+        output = self.session("\t2\r", "  1.25\t\r")
+        self.assertIn("Remaining balance: 9998.75", output)
+
+    def test_extra_amount_tokens_are_not_a_valid_prefix(self):
+        self.assertIn("positive amount", self.session("2", "1.25 extra"))

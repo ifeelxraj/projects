@@ -2,101 +2,76 @@
 #include "atm/pin.hpp"
 
 #include <iostream>
+#include <optional>
 #include <string>
-using namespace std;
+#include <string_view>
 
-string pin = "2486";
-atm::Account account{1'000'000};
+namespace {
 
-void pinchange()
-{
-    string enteredpin, newpin;
-    cout << "Enter Current Pin: ";
-    if (!(cin >> enteredpin) || enteredpin != pin)
-    {
-        cout << "PIN not changed.\n";
+std::optional<std::string> prompt(std::string_view question) {
+    std::cout << question << std::flush;
+    std::string line;
+    if (!std::getline(std::cin, line)) return std::nullopt;
+    const auto first = line.find_first_not_of(" \t\r");
+    if (first == line.npos) return std::string{};
+    return line.substr(first, line.find_last_not_of(" \t\r") - first + 1);
+}
+
+bool authenticate(std::string_view pin) {
+    for (int attempt = 0; attempt < 3; ++attempt) {
+        const auto entered = prompt("Enter PIN: ");
+        if (!entered) return false;
+        if (*entered == pin) return true;
+        std::cout << "Wrong PIN.\n";
+    }
+    std::cout << "Too many attempts. Session ended.\n";
+    return false;
+}
+
+void change_pin(std::string& pin) {
+    const auto current = prompt("Current PIN: ");
+    if (!current || *current != pin) {
+        std::cout << "PIN not changed.\n";
         return;
     }
-    cout << "Generate New Pin: ";
-    if (!(cin >> newpin) || !atm::valid_pin(newpin) || newpin == pin)
-    {
-        cout << "Choose a different four-digit PIN.\n";
+    const auto next = prompt("New PIN: ");
+    if (!next || !atm::valid_pin(*next) || *next == pin) {
+        std::cout << "Choose a different four-digit PIN.\n";
         return;
     }
-    pin = newpin;
-    cout << "Pin changed successfully\n";
+    pin = *next;
+    std::cout << "Pin changed successfully.\n";
 }
 
-void checkbalance()
-{
-    cout << "Balance: " << atm::format_amount(account.balance()) << "\n";
-}
-
-void withdraw()
-{
-    string text;
-    cout << "Enter amount to withdraw: ";
-    if (!(cin >> text)) return;
-    const auto amount = atm::parse_amount(text);
-    if (!amount || *amount == 0)
-    {
-        cout << "Enter a positive amount, for example 12.50.\n";
+void withdraw(atm::Account& account) {
+    const auto text = prompt("Amount to withdraw: ");
+    if (!text) return;
+    const auto amount = atm::parse_amount(*text);
+    if (!amount || *amount == 0) {
+        std::cout << "Enter a positive amount, for example 12.50.\n";
         return;
     }
-    if (account.withdraw(*amount) != atm::Result::ok)
-    {
-        cout << "Insufficient balance.\n";
+    if (account.withdraw(*amount) != atm::Result::ok) {
+        std::cout << "Insufficient balance.\n";
         return;
     }
-    cout << "Withdrawal amount: " << atm::format_amount(*amount) << "\n";
-    cout << "Remaining balance: " << atm::format_amount(account.balance()) << "\n";
+    std::cout << "Withdrawal amount: " << atm::format_amount(*amount) << '\n';
+    std::cout << "Remaining balance: " << atm::format_amount(account.balance()) << '\n';
 }
 
-void showMenu()
-{
-    int choice;
-    cout << "1) Check Balance\n2) Withdraw Money\n3) Generate New Pin\n";
-    cin >> choice;
-    
-    switch (choice)
-    {
-        case 1: 
-            checkbalance();
-            break;
-        
-        case 2: 
-            withdraw();
-            break;
-            
-        case 3: 
-            pinchange();
-            break;
-    
-        default: 
-            cout << "Invalid Choice\n";
-            break;
-    }
+void show_menu(atm::Account& account, std::string& pin) {
+    const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\nChoice: ");
+    if (!choice) return;
+    if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
+    else if (*choice == "2") withdraw(account);
+    else if (*choice == "3") change_pin(pin);
+    else std::cout << "Invalid choice.\n";
 }
 
-void login()
-{
-    for (int attempt = 0; attempt < 3; ++attempt)
-    {
-        string entered;
-        cout << "Enter Pin: ";
-        if (!(cin >> entered)) return;
-        if (pin == entered)
-        {
-            showMenu();
-            return;
-        }
-        cout << "Wrong PIN.\n";
-    }
-    cout << "Too many attempts. Session ended.\n";
-}
+}  // namespace
 
-int main()
-{
-    login();
-    return 0;
+int main() {
+    atm::Account account{1'000'000};
+    std::string pin = "2486";
+    if (authenticate(pin)) show_menu(account, pin);
 }
