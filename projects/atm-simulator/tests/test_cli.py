@@ -158,3 +158,16 @@ class TerminalTests(unittest.TestCase):
         self.assertIn("No transactions yet.", output)
         self.assertNotIn("Wrong PIN.", output)
         self.assertIn("Balance: 10000.00", output)
+
+    def test_eof_at_an_interactive_prompt_is_a_clean_stop(self):
+        # Each tuple is a complete stdin stream, ending at a different prompt.
+        prefixes = [(), (DEMO_PIN,), (DEMO_PIN, DEMO_PIN)]
+        for partial in [("2",), ("4",), ("6",), ("3",), ("3", DEMO_PIN), ("3", DEMO_PIN, "0007")]:
+            prefixes.append((DEMO_PIN, DEMO_PIN, *partial))
+        for lines in prefixes:
+            with self.subTest(lines=lines):
+                result = invoke(*lines)
+                self.assertEqual(result.returncode, 0)
+                self.assertEqual(result.stderr, "")
+                self.assertNotIn("changed successfully", result.stdout)
+                self.assertNotIn("Remaining balance:", result.stdout)
