@@ -19,3 +19,6 @@ a real PIN**. Choose `1` to see the opening balance of `10000.00`.
 
 Run `make test` with Python 3 installed for end-to-end checks of the compiled
 program. The checks do not require any Python packages.
+
+For a smaller practice account, run `./build/atm --opening-balance 25.50`.
+Run `./build/atm --help` to see the startup options without signing in.
