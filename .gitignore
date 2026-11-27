@@ -1,0 +1,4 @@
+# Local build products and Python test caches
+build/
+__pycache__/
+*.pyc
