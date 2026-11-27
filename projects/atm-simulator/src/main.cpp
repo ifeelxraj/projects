@@ -57,29 +57,42 @@ void change_pin(std::string& pin) {
     std::cout << "Pin changed successfully.\n";
 }
 
-void withdraw(atm::Account& account) {
-    const auto text = prompt("Amount to withdraw: ");
+enum class Action { withdraw, deposit };
+
+void transact(atm::Account& account, Action action) {
+    const bool debit = action == Action::withdraw;
+    const auto text = prompt(debit ? "Amount to withdraw: " : "Amount to deposit: ");
     if (!text) return;
     const auto amount = atm::parse_amount(*text);
-    if (!amount || *amount == 0) {
+    if (!amount) {
         std::cout << "Enter a positive amount, for example 12.50.\n";
         return;
     }
-    if (account.withdraw(*amount) != atm::Result::ok) {
-        std::cout << "Insufficient balance.\n";
-        return;
+    const auto result = debit ? account.withdraw(*amount) : account.deposit(*amount);
+    switch (result) {
+        case atm::Result::zero_amount:
+            std::cout << "Enter a positive amount, for example 12.50.\n";
+            return;
+        case atm::Result::insufficient_funds:
+            std::cout << "Insufficient balance.\n";
+            return;
+        case atm::Result::balance_limit:
+            std::cout << "Deposit would exceed the balance limit.\n";
+            return;
+        case atm::Result::ok: break;
     }
-    std::cout << "Withdrawal amount: " << atm::format_amount(*amount) << '\n';
+    std::cout << (debit ? "Withdrawal amount: " : "Deposit amount: ") << atm::format_amount(*amount) << '\n';
     std::cout << "Remaining balance: " << atm::format_amount(account.balance()) << '\n';
 }
 
 void show_menu(atm::Account& account, std::string& pin) {
     for (;;) {
-        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n0) Exit\nChoice: ");
+        const auto choice = prompt("1) Check balance\n2) Withdraw\n3) Change PIN\n4) Deposit\n0) Exit\nChoice: ");
         if (!choice || *choice == "0") return;
         if (*choice == "1") std::cout << "Balance: " << atm::format_amount(account.balance()) << '\n';
-        else if (*choice == "2") withdraw(account);
+        else if (*choice == "2") transact(account, Action::withdraw);
         else if (*choice == "3") change_pin(pin);
+        else if (*choice == "4") transact(account, Action::deposit);
         else std::cout << "Invalid choice.\n";
     }
 }

@@ -102,3 +102,13 @@ class TerminalTests(unittest.TestCase):
         self.assertIn("Invalid choice.", output)
         self.assertIn("Balance: 9989.99", output)
         self.assertEqual(output.count("Withdrawal amount:"), 1)
+
+    def test_deposit_can_fund_a_later_withdrawal(self):
+        output = self.session("4", "0.03", "2", "10000.02", "1", "0")
+        self.assertIn("Deposit amount: 0.03", output)
+        self.assertIn("Balance: 0.01", output)
+
+    def test_deposit_overflow_does_not_change_balance(self):
+        output = self.session("4", "184467440737095516.15", "1", "0")
+        self.assertIn("exceed the balance limit", output)
+        self.assertIn("Balance: 10000.00", output)
