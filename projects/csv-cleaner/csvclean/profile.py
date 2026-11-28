@@ -1,15 +1,17 @@
 """Profile shape and completeness without collecting or exposing cell values."""
 
+from .layout import compile_layout
 from .reader import Table
 
 
-def profile(source, **options):
+def profile(source, *, only=(), **options):
     table = Table(source, **options)
-    columns = [{"name": name, "empty": 0, "whitespace_only": 0, "max_chars": 0} for name in table.header]
+    layout = compile_layout(table.header, keep=only)
+    columns = [{"name": name, "empty": 0, "whitespace_only": 0, "max_chars": 0} for name in layout.names]
     count = 0
     for row in table:
         count += 1
-        for cell, stats in zip(row.fields, columns):
+        for cell, stats in zip(layout.select(row.fields), columns):
             if not cell:
                 stats["empty"] += 1
             elif not cell.strip():

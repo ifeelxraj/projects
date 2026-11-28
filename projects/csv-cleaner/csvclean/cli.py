@@ -61,6 +61,7 @@ def parser():
     stats = commands.add_parser("profile", help="summarize completeness without listing values")
     source_options(stats)
     rule_options(stats)
+    stats.add_argument("--only", metavar="NAME", action="append", default=[], help="profile selected columns in order")
     template = commands.add_parser("schema", help="emit a starter schema from the header only")
     source_options(template)
     return root
@@ -83,7 +84,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
                 return 0
             options["rules"] = rules_for(args)
             if args.command == "profile":
-                json.dump(profile(source, **options), stdout, ensure_ascii=False)
+                json.dump(profile(source, only=args.only, **options), stdout, ensure_ascii=False)
                 stdout.write("\n")
                 return 0
             if args.command == "clean":

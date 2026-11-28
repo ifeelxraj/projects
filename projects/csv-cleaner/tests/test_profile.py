@@ -15,3 +15,9 @@ class ProfileTests(unittest.TestCase):
 
     def test_failing_profiles_do_not_publish_partial_results(self):
         self.assertEqual(run("profile", text="a,b\n1,2\n3")[:2], (1, ""))
+
+    def test_subset_profiles_keep_order_without_ignoring_other_columns_rules(self):
+        rc, out, _ = run("profile", "--only", "b", "--only", "a", text="a,b,c\n1,2,3")
+        self.assertEqual(rc, 0)
+        self.assertEqual([c["name"] for c in json.loads(out)["columns"]], ["b", "a"])
+        self.assertEqual(run("profile", "--only", "b", "--require", "c", text="a,b,c\n1,2,")[:2], (1, ""))
