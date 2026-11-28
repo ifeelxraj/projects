@@ -35,3 +35,18 @@ class GapTests(unittest.TestCase):
             self.assertEqual({m for gap in gaps for m in range(gap.start, gap.end)}, expected)
             self.assertEqual(sum(g.minutes for g in gaps), len(expected))
             self.assertTrue(all(x.end < y.start for x, y in zip(gaps, gaps[1:])))
+
+    def test_split_shifts_with_overlapping_windows_match_set_subtraction(self):
+        import random
+        from slotfind.availability import available_across
+        rng = random.Random(31)
+        def sample():
+            return [Span(*sorted(rng.sample(range(40), 2))) for _ in range(rng.randrange(7))]
+        def minutes(spans):
+            return {m for s in spans for m in range(s.start, s.end)}
+        for _ in range(250):
+            work, busy = sample(), sample()
+            expected = minutes(work) - minutes(busy)
+            gaps = available_across(work, busy)
+            self.assertEqual(minutes(gaps), expected)
+            self.assertEqual(sum(g.minutes for g in gaps), len(expected))
