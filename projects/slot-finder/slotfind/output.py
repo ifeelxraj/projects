@@ -19,3 +19,15 @@ def write_blocks(blocks, fmt, output):
     else:
         for block in blocks:
             print(block, file=output)
+
+
+def write_summary(summary, fmt, output):
+    if fmt == "json":
+        print(json.dumps(summary), file=output)
+    elif fmt == "csv":
+        writer = csv.DictWriter(output, fieldnames=tuple(summary), lineterminator="\n")
+        writer.writeheader()
+        writer.writerow(summary)
+    else:
+        for name, value in summary.items():
+            print(f"{name.replace('_', ' ')}: {value}", file=output)

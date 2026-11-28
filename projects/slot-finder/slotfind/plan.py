@@ -21,6 +21,12 @@ class Plan:
     resources: tuple
     blockers: tuple
 
+    def summary(self):
+        working = sum(w.minutes for w in self.windows)
+        free = sum(g.minutes for g in self.gaps)
+        return {"work_minutes": working, "busy_minutes": working - free, "free_minutes": free,
+                "free_blocks": len(self.gaps), "longest_free_minutes": max((g.minutes for g in self.gaps), default=0)}
+
     @cached_property
     def gaps(self):
         return tuple(available_across(self.windows, (b.interval for b in self.blockers)))

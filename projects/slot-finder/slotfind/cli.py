@@ -5,7 +5,7 @@ import sys
 
 from .calendar import CalendarError, SelectionError, bookings
 from .plan import prepare
-from .output import write_blocks
+from .output import write_blocks, write_summary
 from .slots import candidates, non_overlapping
 from .time import duration_minutes, minute, span
 
@@ -64,6 +64,8 @@ def parser():
     slots.add_argument("--limit", type=result_limit, metavar="N", help="emit at most N slots")
     slots.add_argument("--anchor", type=minute, default=0, metavar="HH:MM", help="grid reference time (default midnight)")
     slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
+    summary = commands.add_parser("summary", help="reconcile working, free and occupied minutes")
+    schedule_options(summary)
     return root
 
 
@@ -92,6 +94,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     except (OSError, UnicodeError) as exc:
         print(f"calendar input: {exc}", file=stderr)
         return 2
+    if args.command == "summary":
+        write_summary(plan.summary(), args.format, stdout)
+        return 0
     gaps = plan.gaps
     if args.command == "free":
         blocks = (g for g in gaps if g.minutes >= args.min)
