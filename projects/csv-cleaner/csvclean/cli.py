@@ -5,11 +5,19 @@ from .streams import input_stream
 from .reader import Problem, validate
 
 
+DIALECTS = {"comma": ",", "tab": "\t", "semicolon": ";", "pipe": "|"}
+
+
+def source_options(command):
+    command.add_argument("input", nargs="?", default="-", help="UTF-8 file or - for stdin")
+    command.add_argument("--delimiter", choices=DIALECTS, default="comma")
+
+
 def parser():
     root = argparse.ArgumentParser(prog="csvclean", description="Check and clean delimited tables.")
     commands = root.add_subparsers(dest="command", required=True)
     check = commands.add_parser("validate", help="check the header and every row width")
-    check.add_argument("input", nargs="?", default="-", help="UTF-8 file or - for stdin")
+    source_options(check)
     return root
 
 
@@ -20,7 +28,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stderr = sys.stderr if stderr is None else stderr
     try:
         with input_stream(args.input, stdin) as source:
-            header, count = validate(source)
+            header, count = validate(source, DIALECTS[args.delimiter])
     except Problem as exc:
         print(exc, file=stderr)
         return 1

@@ -29,3 +29,10 @@ class ValidateTests(unittest.TestCase):
             self.assertIn("input error", err)
             path.write_bytes(b"a,b\r\n1,2\r\n")
             self.assertEqual(run("validate", str(path))[0], 0)
+
+    def test_explicit_delimiters_respect_quoting(self):
+        for name, sep in [("semicolon", ";"), ("tab", "\t"), ("pipe", "|")]:
+            with self.subTest(name=name):
+                rc, out, _ = run("validate", "--delimiter", name, text=f'a{sep}b\n"x{sep}y"{sep}z')
+                self.assertEqual(rc, 0)
+                self.assertIn("2 columns", out)
