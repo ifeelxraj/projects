@@ -47,3 +47,8 @@ class LayoutTests(unittest.TestCase):
         first = run(*args, text=' id ,note\n , \n01," a,b "\n01,"a,b"\n02,')
         self.assertEqual(first, (0, 'id,note\r\n01,"a,b"\r\n02,unknown\r\n', ""))
         self.assertEqual(run(*args, text=first[1]), first)
+
+    def test_numbering_is_contiguous_after_filtering_and_collapse(self):
+        cmd = ("clean", "--number-rows", "seq", "--skip-empty", "--collapse-adjacent")
+        self.assertEqual(run(*cmd, text='v\nx\nx\n""\ny')[1], "seq,v\r\n1,x\r\n2,y\r\n")
+        self.assertEqual(run(*cmd, text="seq\noriginal")[:2], (2, ""))

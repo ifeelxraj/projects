@@ -50,6 +50,7 @@ def parser():
     clean = commands.add_parser("clean", help="write canonical CSV after checking each row")
     source_options(clean)
     rule_options(clean)
+    clean.add_argument("--number-rows", metavar="NAME", help="prepend a one-based output row number")
     clean.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), action="append", default=[])
     selection = clean.add_mutually_exclusive_group()
     selection.add_argument("--drop", metavar="NAME", action="append", default=[], help="omit a named column")
@@ -94,7 +95,8 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
                     clean_table(source, target, **options, output_delimiter=DIALECTS[args.output_delimiter],
                                 edits=CellEdits(args.trim, args.fill_empty, args.skip_empty),
-                                keep=args.keep, drop=args.drop, rename=args.rename, collapse=args.collapse_adjacent)
+                                keep=args.keep, drop=args.drop, rename=args.rename, collapse=args.collapse_adjacent,
+                                number_rows=args.number_rows)
                 return 0
             report = audit(source, **options, max_errors=args.max_errors)
     except Problem as exc:
