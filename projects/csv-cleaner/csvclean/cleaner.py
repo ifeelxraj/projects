@@ -3,7 +3,7 @@ import csv
 from .reader import check_width, read_header, records
 
 
-def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=","):
+def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=",", trim=False):
     rows = records(source, delimiter, skip_blank=skip_blank)
     header = read_header(rows)
     # CRLF also makes the standard writer quote cells containing a bare CR.
@@ -11,4 +11,5 @@ def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delim
     writer.writerow(header)
     for row in rows:
         check_width(row, header)
-        writer.writerow(row.fields)
+        values = tuple(cell.strip() for cell in row.fields) if trim else row.fields
+        writer.writerow(values)

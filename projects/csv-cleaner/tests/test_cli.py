@@ -75,3 +75,8 @@ class CleanerTests(unittest.TestCase):
         rc, out, _ = run("clean", "--delimiter", "semicolon", "--output-delimiter", "tab",
                          text='key;note\na;"x;y"\nb;has\ttab\n')
         self.assertEqual((rc, out), (0, 'key\tnote\r\na\tx;y\r\nb\t"has\ttab"\r\n'))
+
+    def test_trim_is_opt_in_and_preserves_internal_spaces(self):
+        sample = " label ,unit\n  two  words , kg \n"
+        self.assertIn("  two  words , kg ", run("clean", text=sample)[1])
+        self.assertEqual(run("clean", "--trim", text=sample)[1], " label ,unit\r\ntwo  words,kg\r\n")
