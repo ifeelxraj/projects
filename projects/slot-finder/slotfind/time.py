@@ -20,3 +20,30 @@ def clock(value):
     if not 0 <= value <= DAY:
         raise ValueError("minutes outside day")
     return f"{value // 60:02d}:{value % 60:02d}"
+
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, order=True)
+class Span:
+    start: int
+    end: int
+
+    def __post_init__(self):
+        if not 0 <= self.start < self.end <= DAY:
+            raise ValueError("interval must start before its end within one day")
+
+    @property
+    def minutes(self):
+        return self.end - self.start
+
+    def __str__(self):
+        return f"{clock(self.start)}-{clock(self.end)}"
+
+
+def span(text):
+    pieces = text.split("-")
+    if len(pieces) != 2:
+        raise ValueError(f"expected HH:MM-HH:MM, got {text!r}")
+    return Span(*(minute(part) for part in pieces))
