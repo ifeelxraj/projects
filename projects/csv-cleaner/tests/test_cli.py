@@ -49,3 +49,12 @@ class ValidateTests(unittest.TestCase):
         self.assertIn("line 2:", err)
         self.assertIn("line 4:", err)
         self.assertNotIn("line 5:", err)
+
+    def test_json_report_keeps_coordinates_separate_from_messages(self):
+        import json
+        rc, out, err = run("validate", "--json", text='id,note\n1,ok\n"x\ny"\n')
+        data = json.loads(out)
+        self.assertEqual((rc, err, data["examined"], data["stopped"]), (1, "", 2, True))
+        self.assertEqual(data["columns"], ["id", "note"])
+        self.assertEqual(data["issues"], [{"first_line": 3, "last_line": 4,
+                                           "message": "expected 2 fields, found 1"}])

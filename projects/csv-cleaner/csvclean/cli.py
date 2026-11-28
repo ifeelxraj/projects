@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 
 from .streams import input_stream
@@ -26,6 +27,7 @@ def parser():
     commands = root.add_subparsers(dest="command", required=True)
     check = commands.add_parser("validate", help="check the header and every row width")
     source_options(check)
+    check.add_argument("--json", action="store_true", help="emit a structured report")
     check.add_argument("--max-errors", type=positive, default=1)
     return root
 
@@ -45,6 +47,12 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     except (OSError, UnicodeError) as exc:
         print(f"input error: {exc}", file=stderr)
         return 2
+    if args.json:
+        json.dump({"columns": report.header, "examined": report.examined, "stopped": report.stopped,
+                   "issues": [{"first_line": e.first, "last_line": e.last, "message": e.message}
+                              for e in report.problems]}, stdout, ensure_ascii=False)
+        stdout.write("\n")
+        return int(bool(report.problems))
     if report.problems:
         for issue in report.problems:
             print(issue, file=stderr)
