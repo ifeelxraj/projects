@@ -66,6 +66,9 @@ def parser():
     slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
     summary = commands.add_parser("summary", help="reconcile working, free and occupied minutes")
     schedule_options(summary)
+    summary.add_argument("--duration", type=positive_minutes, help="also report packable meeting capacity")
+    summary.add_argument("--step", type=positive_minutes, help="capacity grid spacing (default 15m)")
+    summary.add_argument("--anchor", type=minute, help="capacity grid reference (default midnight)")
     return root
 
 
@@ -95,7 +98,13 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
         print(f"calendar input: {exc}", file=stderr)
         return 2
     if args.command == "summary":
-        write_summary(plan.summary(), args.format, stdout)
+        stats = plan.summary()
+        if args.duration is not None:
+            stats["meeting_capacity"] = plan.capacity(args.duration, args.step or 15, args.anchor or 0)
+        elif args.step is not None or args.anchor is not None:
+            print("a capacity grid requires --duration", file=stderr)
+            return 2
+        write_summary(stats, args.format, stdout)
         return 0
     gaps = plan.gaps
     if args.command == "free":

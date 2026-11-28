@@ -21,3 +21,12 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(json.loads(out), {"work_minutes": 120, "busy_minutes": 45, "free_minutes": 75,
                                            "free_blocks": 1, "longest_free_minutes": 75})
+
+    def test_capacity_matches_packed_slots_rather_than_dividing_free_minutes(self):
+        import json
+        from test_cli import run
+        opts = ("--window", "09:01-10:01", "--duration", "20", "--step", "15")
+        stats = json.loads(run("summary", *opts, "--format", "json")[1])
+        packed = run("slots", *opts, "--non-overlap")[1].splitlines()
+        self.assertEqual((stats["meeting_capacity"], len(packed)), (1, 1))
+        self.assertEqual(run("summary", "--step", "5")[0], 2)

@@ -6,6 +6,7 @@ from typing import Optional
 
 from .availability import available_across, union
 from .calendar import select_bookings
+from .slots import candidates, non_overlapping
 from .time import Span
 
 
@@ -20,6 +21,10 @@ class Plan:
     windows: tuple
     resources: tuple
     blockers: tuple
+
+    def capacity(self, duration, step, anchor=0):
+        packed = non_overlapping(candidates(self.gaps, duration, step, anchor))
+        return sum(1 for _ in packed)
 
     def summary(self):
         working = sum(w.minutes for w in self.windows)
