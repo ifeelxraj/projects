@@ -68,10 +68,13 @@ def check_width(row, header):
 class Table:
     """A single-pass table. Ordinary iteration yields checked records only."""
 
-    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules(), order_by=()):
+    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules(), order_by=(), strict_order=False):
         self.rows = records(stream, delimiter, skip_blank=skip_blank)
         self.header = read_header(self.rows, trim=trim_header, expected=rules.columns)
         self.checks = rules.bind(self.header)
+        if strict_order and not order_by:
+            raise OptionError("--strict-order requires --order-by")
+        self.strict_order = strict_order
         self.key = compile_layout(self.header, keep=order_by) if order_by else None
         self.previous_key = None
 
@@ -81,6 +84,8 @@ class Table:
         if self.key:
             previous, current = self.previous_key, self.key.select(row.fields)
             self.previous_key = current
+            if self.strict_order and previous == current:
+                raise row.problem("duplicate ordered key")
             if previous is not None and current < previous:
                 raise row.problem("sort key decreases relative to the preceding valid row")
 
