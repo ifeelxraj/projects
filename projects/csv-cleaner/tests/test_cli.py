@@ -26,7 +26,7 @@ class ValidateTests(unittest.TestCase):
             path = Path(directory) / "sample.csv"
             rc, _, err = run("validate", str(path))
             self.assertEqual(rc, 2)
-            self.assertIn("input error", err)
+            self.assertIn("I/O or encoding error", err)
             path.write_bytes(b"a,b\r\n1,2\r\n")
             self.assertEqual(run("validate", str(path))[0], 0)
 
