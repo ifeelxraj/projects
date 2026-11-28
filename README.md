@@ -6,7 +6,7 @@ Each project lives in `projects/` and has its own setup instructions.
 | --- | --- | --- | --- |
 | [ATM simulator](projects/atm-simulator/) | Practice deposits, withdrawals and reconciliation against a ten-entry mini-statement. | C++17 | Complete |
 | [CSV cleaner](projects/csv-cleaner/) | Validate and clean delimited tables without loading them into memory. | Python | Complete |
-| [Slot finder](projects/slot-finder/) | Find shared free time in a local working day. | Python | In progress |
+| [Slot finder](projects/slot-finder/) | Find shared free time in a local working day. | Python | Complete |
 
 ## Try the simulator
 
@@ -27,6 +27,18 @@ make -C projects/csv-cleaner demo
 
 The [CSV guide](projects/csv-cleaner/README.md) covers validation, profiling,
 cleaning order and atomic output files.
+
+## Find an available meeting time
+
+```sh
+projects/slot-finder/find-slots free --window 09:00-12:00 --busy 10:00-10:30
+python3 examples/availability/plan_export.py
+```
+
+The [slot finder](projects/slot-finder/README.md) can find shared blocks, rank
+meeting suggestions, and explain conflicts. The [export-to-slots recipe](examples/availability/)
+combines both Python tools without producing a schedule from a partial import.
+Run `make demo` at the root to replay all examples.
 
 ## Continue development
 
