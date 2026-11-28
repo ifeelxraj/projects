@@ -19,7 +19,16 @@ def positive_minutes(text):
     return value
 
 
+def nonnegative_minutes(text):
+    value = int(text)
+    if not 0 <= value <= 1440:
+        raise argparse.ArgumentTypeError("expected 0 to 1440 minutes")
+    return value
+
+
 def schedule_options(cmd):
+    cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
+    cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
     cmd.add_argument("--window", type=interval_arg, default=span("09:00-17:00"), metavar="START-END")
     cmd.add_argument("--busy", type=interval_arg, action="append", default=[], metavar="START-END")
 
@@ -36,7 +45,8 @@ def parser():
 def main(argv=None, *, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
-    for block in available(args.window, args.busy):
+    busy = (period.padded(args.before, args.after) for period in args.busy)
+    for block in available(args.window, busy):
         if block.minutes >= args.min:
             print(block, file=stdout)
     return 0

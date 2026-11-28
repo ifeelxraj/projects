@@ -36,6 +36,11 @@ class Span:
     def minutes(self):
         return self.end - self.start
 
+    def padded(self, before=0, after=0):
+        if min(before, after) < 0:
+            raise ValueError("padding cannot be negative")
+        return Span(max(0, self.start - before), min(DAY, self.end + after))
+
     def intersect(self, other):
         lo, hi = max(self.start, other.start), min(self.end, other.end)
         return Span(lo, hi) if lo < hi else None
