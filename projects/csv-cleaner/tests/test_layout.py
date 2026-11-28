@@ -11,3 +11,9 @@ class LayoutTests(unittest.TestCase):
     def test_unknown_and_repeated_names_do_not_emit_a_header(self):
         for args in [("--keep", "x"), ("--keep", "a", "--keep", "a")]:
             self.assertEqual(run("clean", *args, text="a,b\n1,2")[:2], (2, ""))
+
+    def test_drop_preserves_order_and_does_not_mask_input_width_errors(self):
+        args = ("clean", "--drop", "mid")
+        self.assertEqual(run(*args, text="a,mid,b\n1,2,3")[1], "a,b\r\n1,3\r\n")
+        self.assertEqual(run(*args, text="a,mid,b\n1,3")[0], 1)
+        self.assertEqual(run("clean", "--drop", "a", text="a\n1")[0], 2)

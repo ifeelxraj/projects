@@ -16,9 +16,16 @@ class Layout:
         return tuple(fields[i] for i in self.indices)
 
 
-def compile_layout(header, *, keep=()):
+def compile_layout(header, *, keep=(), drop=()):
     positions = {name: i for i, name in enumerate(header)}
-    names = tuple(keep) if keep else header
+    if keep and drop:
+        raise OptionError("choose either --keep or --drop")
+    omitted = set(drop)
+    if len(omitted) != len(drop) or omitted.difference(positions):
+        raise OptionError("unknown or repeated column in --drop")
+    names = tuple(keep) if keep else tuple(n for n in header if n not in omitted)
+    if not names:
+        raise OptionError("cannot drop all columns")
     if len(set(names)) != len(names):
         raise OptionError("repeated column selection")
     for name in names:
