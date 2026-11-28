@@ -3,8 +3,8 @@ from contextlib import nullcontext
 from itertools import islice
 import sys
 
-from .calendar import CalendarError, SelectionError, bookings, select_bookings
-from .availability import available_across
+from .calendar import CalendarError, SelectionError, bookings
+from .plan import prepare
 from .output import write_blocks
 from .slots import candidates, non_overlapping
 from .time import duration_minutes, minute, span
@@ -76,13 +76,13 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
         print("stdin can only be used once", file=stderr)
         return 2
     entries = []
-    periods = list(args.busy)
     try:
         for path in args.calendar:
             handle = nullcontext(stdin) if path == "-" else open(path, encoding="utf-8-sig", newline="")
             with handle as stream:
                 entries.extend(bookings(stream, path))
-        periods.extend(b.interval for b in select_bookings(entries, args.resource) if b.blocks(ignore_tentative=args.ignore_tentative))
+        plan = prepare(args.window or [span("09:00-17:00")], args.busy, entries, names=args.resource,
+                       before=args.before, after=args.after, ignore_tentative=args.ignore_tentative)
     except SelectionError as exc:
         print(exc, file=stderr)
         return 2
@@ -92,8 +92,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     except (OSError, UnicodeError) as exc:
         print(f"calendar input: {exc}", file=stderr)
         return 2
-    busy = (period.padded(args.before, args.after) for period in periods)
-    gaps = available_across(args.window or [span("09:00-17:00")], busy)
+    gaps = plan.gaps
     if args.command == "free":
         blocks = (g for g in gaps if g.minutes >= args.min)
     else:
