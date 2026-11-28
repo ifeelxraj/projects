@@ -25,3 +25,9 @@ class CalendarTests(unittest.TestCase):
             b.write_bytes(b"resource,start,end\nB,09:40,10:00\n")
             result = run("free", "--window", "09:00-10:30", "--busy", "10:15-10:30", "--calendar", str(a), "--calendar", str(b))
             self.assertEqual(result, (0, "09:30-09:40\n10:00-10:15\n", ""))
+
+    def test_stdin_calendar_can_only_be_consumed_once(self):
+        from test_cli import run
+        cmd = ("free", "--calendar", "-", "--window", "09:00-10:00")
+        self.assertEqual(run(*cmd, text="resource,start,end\nA,09:00,09:45"), (0, "09:45-10:00\n", ""))
+        self.assertEqual(run(*cmd, "--calendar", "-")[0], 2)

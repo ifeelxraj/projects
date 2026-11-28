@@ -1,4 +1,5 @@
 import argparse
+from contextlib import nullcontext
 from itertools import islice
 import sys
 
@@ -64,14 +65,19 @@ def parser():
     return root
 
 
-def main(argv=None, *, stdout=None, stderr=None):
+def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
+    stdin = sys.stdin if stdin is None else stdin
+    if args.calendar.count("-") > 1:
+        print("stdin can only be used once", file=stderr)
+        return 2
     periods = list(args.busy)
     try:
         for path in args.calendar:
-            with open(path, encoding="utf-8-sig", newline="") as stream:
+            handle = nullcontext(stdin) if path == "-" else open(path, encoding="utf-8-sig", newline="")
+            with handle as stream:
                 periods.extend(b.interval for b in bookings(stream, path))
     except CalendarError as exc:
         print(exc, file=stderr)

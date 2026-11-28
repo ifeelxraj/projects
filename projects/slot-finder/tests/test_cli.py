@@ -4,9 +4,9 @@ import unittest
 from slotfind.cli import main
 
 
-def run(*args):
+def run(*args, text=""):
     out, err = io.StringIO(), io.StringIO()
-    rc = main(args, stdout=out, stderr=err)
+    rc = main(args, stdin=io.StringIO(text, newline=""), stdout=out, stderr=err)
     return rc, out.getvalue(), err.getvalue()
 
 
