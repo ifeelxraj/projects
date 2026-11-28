@@ -32,3 +32,20 @@ def records(stream, delimiter=","):
         except csv.Error as exc:
             raise Problem(str(exc), first, max(first, reader.line_num)) from exc
         yield Record(first, reader.line_num, tuple(values))
+
+
+def read_header(rows):
+    try:
+        row = next(rows)
+    except StopIteration:
+        raise Problem("missing header", 1, 1) from None
+    if not row.fields:
+        raise row.problem("empty header record")
+    seen = set()
+    for index, name in enumerate(row.fields, 1):
+        if not name.strip():
+            raise row.problem(f"blank header at column {index}")
+        if name in seen:
+            raise row.problem(f"duplicate header at column {index}: {name!r}")
+        seen.add(name)
+    return row.fields

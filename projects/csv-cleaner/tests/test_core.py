@@ -18,3 +18,13 @@ class ReaderTests(unittest.TestCase):
             yield "first\n"
             raise AssertionError("read past requested record")
         self.assertEqual(next(records(lines())).fields, ("first",))
+
+
+class HeaderTests(unittest.TestCase):
+    def test_header_is_required_and_unambiguous(self):
+        from csvclean.reader import Problem, read_header
+        for text, message in [("", "missing header"), ("\n", "empty header"),
+                              ("a, \n", "blank header"), ("a,a\n", "duplicate header")]:
+            with self.subTest(text=text), self.assertRaisesRegex(Problem, message):
+                read_header(source(text))
+        self.assertEqual(read_header(source("Name,name\n")), ("Name", "name"))
