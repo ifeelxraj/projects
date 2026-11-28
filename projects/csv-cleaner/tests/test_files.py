@@ -36,3 +36,23 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(rc, 2)
             self.assertIn("same file", err)
             self.assertEqual(dest.read_bytes(), source.read_bytes())
+
+    def test_competing_creation_cannot_be_overwritten_at_publication(self):
+        from csvclean.streams import output_stream
+        with TemporaryDirectory() as d:
+            dest = Path(d) / "race.csv"
+            with self.assertRaises(FileExistsError):
+                with output_stream(dest, None) as pending:
+                    pending.write("candidate")
+                    dest.write_text("competitor", encoding="utf-8")
+            self.assertEqual(dest.read_text(encoding="utf-8"), "competitor")
+            self.assertEqual(list(Path(d).iterdir()), [dest])
+
+    def test_writer_exception_does_not_leak_temporary_files(self):
+        from csvclean.streams import output_stream
+        with TemporaryDirectory() as d:
+            with self.assertRaisesRegex(RuntimeError, "interrupt"):
+                with output_stream(Path(d) / "out.csv", None) as pending:
+                    pending.write("partial")
+                    raise RuntimeError("interrupt")
+            self.assertEqual(list(Path(d).iterdir()), [])
