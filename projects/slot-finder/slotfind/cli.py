@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from .availability import available_across
+from .slots import candidates
 from .time import span
 
 
@@ -39,6 +40,10 @@ def parser():
     free = commands.add_parser("free", help="list shared free blocks")
     schedule_options(free)
     free.add_argument("--min", type=positive_minutes, default=1, metavar="MINUTES", help="minimum useful free block")
+    slots = commands.add_parser("slots", help="list fixed-length meetings inside free blocks")
+    schedule_options(slots)
+    slots.add_argument("--duration", type=positive_minutes, required=True, metavar="MINUTES")
+    slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
     return root
 
 
@@ -46,7 +51,11 @@ def main(argv=None, *, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
     busy = (period.padded(args.before, args.after) for period in args.busy)
-    for block in available_across(args.window or [span("09:00-17:00")], busy):
-        if block.minutes >= args.min:
-            print(block, file=stdout)
+    gaps = available_across(args.window or [span("09:00-17:00")], busy)
+    if args.command == "free":
+        blocks = (g for g in gaps if g.minutes >= args.min)
+    else:
+        blocks = candidates(gaps, args.duration, args.step)
+    for block in blocks:
+        print(block, file=stdout)
     return 0

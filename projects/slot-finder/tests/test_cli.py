@@ -28,3 +28,10 @@ class FreeTests(unittest.TestCase):
     def test_multiple_work_windows_leave_lunch_unavailable(self):
         self.assertEqual(run("free", "--window", "09:00-12:00", "--window", "13:00-17:00",
                              "--busy", "11:45-13:20")[1], "09:00-11:45\n13:20-17:00\n")
+
+
+class SlotTests(unittest.TestCase):
+    def test_slots_may_overlap_each_other_but_not_a_booking(self):
+        rc, out, _ = run("slots", "--duration", "20", "--step", "10", "--window", "09:00-10:00",
+                         "--busy", "09:30-09:40")
+        self.assertEqual((rc, out), (0, "09:00-09:20\n09:10-09:30\n09:40-10:00\n"))
