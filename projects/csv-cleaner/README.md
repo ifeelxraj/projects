@@ -61,3 +61,5 @@ safe to execute or interpret as formulas in a spreadsheet.
   encoding or I/O error. `--field-limit CHARS` bounds a single parsed field;
   otherwise Python's CSV parser limit applies. Memory depends on record width,
   maximum record size and the configured diagnostic limit, not total row count.
+
+For the rule grammar, key ordering and JSON report contract, see [Validating a data contract](SCHEMAS.md).
