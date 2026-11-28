@@ -53,3 +53,9 @@ class SlotTests(unittest.TestCase):
     def test_packing_returns_back_to_back_appointments_not_alternatives(self):
         rc, out, _ = run("slots", "--window", "10:00-11:00", "--step", "5", "--duration", "20", "--non-overlap")
         self.assertEqual((rc, out), (0, "10:00-10:20\n10:20-10:40\n10:40-11:00\n"))
+
+    def test_json_has_explicit_endpoints_and_empty_list_for_no_fit(self):
+        import json
+        result = run("free", "--format", "json", "--window", "23:45-24:00")
+        self.assertEqual(json.loads(result[1]), [{"start": "23:45", "end": "24:00", "minutes": 15}])
+        self.assertEqual(json.loads(run("slots", "--duration", "24h", "--format", "json")[1]), [])

@@ -3,6 +3,7 @@ from itertools import islice
 import sys
 
 from .availability import available_across
+from .output import write_blocks
 from .slots import candidates, non_overlapping
 from .time import duration_minutes, minute, span
 
@@ -36,6 +37,7 @@ def result_limit(text):
 
 
 def schedule_options(cmd):
+    cmd.add_argument("--format", choices=("text", "json"), default="text")
     cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
     cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
     cmd.add_argument("--window", type=interval_arg, action="append", default=[], metavar="START-END")
@@ -75,6 +77,5 @@ def main(argv=None, *, stdout=None, stderr=None):
             blocks = non_overlapping(blocks)
         if args.limit is not None:
             blocks = islice(blocks, args.limit)
-    for block in blocks:
-        print(block, file=stdout)
+    write_blocks(blocks, args.format, stdout)
     return 0
