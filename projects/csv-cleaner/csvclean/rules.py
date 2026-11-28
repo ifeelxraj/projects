@@ -18,6 +18,7 @@ def iso_date(value):
 
 @dataclass(frozen=True)
 class Rules:
+    columns: tuple = ()
     required: tuple = ()
     integer: tuple = ()
     date: tuple = ()

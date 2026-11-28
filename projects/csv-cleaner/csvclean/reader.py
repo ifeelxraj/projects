@@ -39,7 +39,7 @@ def records(stream, delimiter=",", *, skip_blank=False):
         yield Record(first, reader.line_num, tuple(values))
 
 
-def read_header(rows, *, trim=False):
+def read_header(rows, *, trim=False, expected=()):
     try:
         row = next(rows)
     except StopIteration:
@@ -54,6 +54,8 @@ def read_header(rows, *, trim=False):
         if name in seen:
             raise row.problem(f"duplicate header at column {index}: {name!r}")
         seen.add(name)
+    if expected and names != expected:
+        raise row.problem("header names or order differ from schema columns")
     return names
 
 
@@ -67,7 +69,7 @@ class Table:
 
     def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules()):
         self.rows = records(stream, delimiter, skip_blank=skip_blank)
-        self.header = read_header(self.rows, trim=trim_header)
+        self.header = read_header(self.rows, trim=trim_header, expected=rules.columns)
         self.checks = rules.bind(self.header)
 
     def check(self, row):

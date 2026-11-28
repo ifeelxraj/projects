@@ -23,3 +23,10 @@ class SchemaTests(unittest.TestCase):
         for spec in [{}, {"version": True}, {"version": 1, "typo": []},
                      {"version": 1, "integer": "count"}, {"version": 1, "required": ["a", "a"]}]:
             self.assertEqual(self.check(spec, "a\n1")[0], 2)
+
+    def test_optional_column_contract_detects_schema_drift(self):
+        schema = {"version": 1, "columns": ["a", "b"]}
+        for header in ("b,a", "a", "a,b,c", "x,b"):
+            self.assertEqual(self.check(schema, header)[0], 1)
+        self.assertEqual(self.check(schema, " a ,b", "--trim-header")[0], 0)
+        self.assertEqual(self.check({"version": 1, "columns": []}, "x")[0], 2)
