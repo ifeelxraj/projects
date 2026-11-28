@@ -70,7 +70,13 @@ class SelectionError(ValueError):
 def select_bookings(entries, names):
     """Validate the entire selection, including names found only in later files."""
     wanted = set(names)
-    missing = wanted.difference(b.resource for b in entries)
+    found = set()
+    selected = []
+    for entry in entries:
+        if not wanted or entry.resource in wanted:
+            selected.append(entry)
+            found.add(entry.resource)
+    missing = wanted - found
     if missing:
         raise SelectionError(f"unknown resource: {min(missing)!r}")
-    return [b for b in entries if not wanted or b.resource in wanted]
+    return selected

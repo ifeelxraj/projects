@@ -88,13 +88,14 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     if args.calendar.count("-") > 1:
         print("stdin can only be used once", file=stderr)
         return 2
-    entries = []
-    try:
+    def entries():
         for path in args.calendar:
             handle = nullcontext(stdin) if path == "-" else open(path, encoding="utf-8-sig", newline="")
             with handle as stream:
-                entries.extend(bookings(stream, path))
-        plan = prepare(args.window or [span("09:00-17:00")], args.busy, entries, names=args.resource,
+                yield from bookings(stream, path)
+
+    try:
+        plan = prepare(args.window or [span("09:00-17:00")], args.busy, entries(), names=args.resource,
                        before=args.before, after=args.after, ignore_tentative=args.ignore_tentative)
     except SelectionError as exc:
         print(exc, file=stderr)

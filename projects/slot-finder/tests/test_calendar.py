@@ -54,3 +54,10 @@ class CalendarTests(unittest.TestCase):
         args = ("free", "--calendar", "-", "--window", "09:00-10:00")
         self.assertEqual(run(*args, text=data)[1], "")
         self.assertEqual(run(*args, "--ignore-tentative", text=data)[1], "09:00-09:30\n09:45-10:00\n")
+
+    def test_selecting_from_a_one_pass_import_does_not_exhaust_it_twice(self):
+        from slotfind.calendar import select_bookings
+        text = "resource,start,end\nA,09:00,10:00\nB,10:00,11:00"
+        entries = bookings(io.StringIO(text))
+        self.assertEqual(select_bookings(entries, ["B"]), [Booking("B", span("10:00-11:00"))])
+        self.assertEqual(len(select_bookings(bookings(io.StringIO(text)), [])), 2)
