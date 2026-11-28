@@ -22,6 +22,14 @@ class Plan:
     resources: tuple
     blockers: tuple
 
+    def available_resources(self, request):
+        if not any(window.contains(request) for window in self.windows):
+            return []
+        occupied = {b.resource for b in self.blockers if b.interval.intersect(request)}
+        if None in occupied:
+            return []
+        return [name for name in self.resources if name not in occupied]
+
     def explain(self, request):
         inside = any(window.contains(request) for window in self.windows)
         conflicts = []

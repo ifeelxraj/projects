@@ -40,3 +40,11 @@ class PlanTests(unittest.TestCase):
         self.assertEqual((rc, info["inside_work"], info["available"]), (0, True, False))
         self.assertEqual(info["conflicts"], [{"resource": "Bench", "blocked": "09:55-10:20", "overlap": "09:55-10:00"}])
         self.assertIn("Not wholly inside", run("explain", "08:30-09:30")[1])
+
+    def test_rooms_require_the_same_resource_for_the_entire_request(self):
+        from test_cli import run
+        data = "resource,start,end,status\nA,09:00,09:15,busy\nB,09:15,09:30,busy\nC,09:00,09:30,free"
+        cmd = ("rooms", "09:00-09:30", "--calendar", "-")
+        self.assertEqual(run(*cmd, text=data)[1], "C\n")
+        self.assertEqual(run(*cmd, "--busy", "09:15-09:20", text=data)[1], "")
+        self.assertEqual(run(*cmd, "--window", "10:00-12:00", text=data)[1], "")

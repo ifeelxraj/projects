@@ -43,3 +43,15 @@ def write_explanation(info, fmt, output):
     for conflict in info["conflicts"]:
         label = conflict["resource"] or "(manual block)"
         print(f"{label}: {conflict['blocked']} overlaps {conflict['overlap']}", file=output)
+
+
+def write_names(names, fmt, output):
+    if fmt == "json":
+        print(json.dumps(names, ensure_ascii=False), file=output)
+    elif fmt == "csv":
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(["resource"])
+        writer.writerows([name] for name in names)
+    else:
+        for name in names:
+            print(name, file=output)

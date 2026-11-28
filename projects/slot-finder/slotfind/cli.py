@@ -5,7 +5,7 @@ import sys
 
 from .calendar import CalendarError, SelectionError, bookings
 from .plan import prepare
-from .output import write_blocks, write_explanation, write_summary
+from .output import write_blocks, write_explanation, write_names, write_summary
 from .slots import candidates, non_overlapping
 from .time import duration_minutes, minute, span
 
@@ -72,6 +72,9 @@ def parser():
     explain = commands.add_parser("explain", help="explain why a requested meeting does or does not fit")
     schedule_options(explain, ("text", "json"))
     explain.add_argument("request", type=interval_arg, metavar="START-END")
+    rooms = commands.add_parser("rooms", help="list individual resources available for the whole request")
+    schedule_options(rooms)
+    rooms.add_argument("request", type=interval_arg, metavar="START-END")
     return root
 
 
@@ -100,6 +103,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     except (OSError, UnicodeError) as exc:
         print(f"calendar input: {exc}", file=stderr)
         return 2
+    if args.command == "rooms":
+        write_names(plan.available_resources(args.request), args.format, stdout)
+        return 0
     if args.command == "explain":
         write_explanation(plan.explain(args.request), args.format, stdout)
         return 0
