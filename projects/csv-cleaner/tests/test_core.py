@@ -28,3 +28,14 @@ class HeaderTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaisesRegex(Problem, message):
                 read_header(source(text))
         self.assertEqual(read_header(source("Name,name\n")), ("Name", "name"))
+
+
+class WidthTests(unittest.TestCase):
+    def test_counts_data_records_not_physical_lines(self):
+        from csvclean.reader import validate
+        self.assertEqual(validate(io.StringIO('a,b\n1,"x\ny"\n2,z')), (("a", "b"), 2))
+
+    def test_width_diagnostic_spans_entire_logical_record(self):
+        from csvclean.reader import Problem, validate
+        with self.assertRaisesRegex(Problem, "lines 2-3: expected 2 fields, found 1"):
+            validate(io.StringIO('a,b\n"x\ny"\n'))

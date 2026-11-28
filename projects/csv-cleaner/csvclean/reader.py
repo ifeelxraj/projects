@@ -49,3 +49,18 @@ def read_header(rows):
             raise row.problem(f"duplicate header at column {index}: {name!r}")
         seen.add(name)
     return row.fields
+
+
+def check_width(row, header):
+    if len(row.fields) != len(header):
+        raise row.problem(f"expected {len(header)} fields, found {len(row.fields)}")
+
+
+def validate(stream, delimiter=","):
+    rows = records(stream, delimiter)
+    header = read_header(rows)
+    count = 0
+    for row in rows:
+        check_width(row, header)
+        count += 1
+    return header, count
