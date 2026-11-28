@@ -58,3 +58,15 @@ class ValidateTests(unittest.TestCase):
         self.assertEqual(data["columns"], ["id", "note"])
         self.assertEqual(data["issues"], [{"first_line": 3, "last_line": 4,
                                            "message": "expected 2 fields, found 1"}])
+
+
+class CleanerTests(unittest.TestCase):
+    def test_normalizes_record_endings_without_changing_cell_text(self):
+        rc, out, err = run("clean", text='a,b\n"1",two\n2,"x\ry"\n3,"a,b"')
+        self.assertEqual((rc, err), (0, ""))
+        self.assertEqual(out, 'a,b\r\n1,two\r\n2,"x\ry"\r\n3,"a,b"\r\n')
+
+    def test_stdout_can_contain_valid_prefix_before_a_late_error(self):
+        rc, out, err = run("clean", text="a,b\n1,2\n3\n")
+        self.assertEqual((rc, out), (1, "a,b\r\n1,2\r\n"))
+        self.assertIn("line 3", err)

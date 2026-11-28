@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 
+from .cleaner import clean_table
 from .streams import input_stream
 from .reader import Problem, audit
 
@@ -29,6 +30,8 @@ def parser():
     source_options(check)
     check.add_argument("--json", action="store_true", help="emit a structured report")
     check.add_argument("--max-errors", type=positive, default=1)
+    clean = commands.add_parser("clean", help="write canonical CSV after checking each row")
+    source_options(clean)
     return root
 
 
@@ -39,6 +42,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stderr = sys.stderr if stderr is None else stderr
     try:
         with input_stream(args.input, stdin) as source:
+            if args.command == "clean":
+                clean_table(source, stdout, delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank)
+                return 0
             report = audit(source, DIALECTS[args.delimiter], skip_blank=args.skip_blank,
                            max_errors=args.max_errors)
     except Problem as exc:
