@@ -38,3 +38,21 @@ def output_stream(path, fallback, *, replace=False, input_path="-"):
             os.link(temp.name, dest)
     finally:
         Path(temp.name).unlink(missing_ok=True)
+
+
+@contextmanager
+def field_limit(characters):
+    """Temporarily override the csv module's process-wide character limit."""
+    import csv
+    from .layout import OptionError
+    if characters is None:
+        yield
+        return
+    try:
+        previous = csv.field_size_limit(characters)
+    except OverflowError as exc:
+        raise OptionError("field limit exceeds the platform maximum") from exc
+    try:
+        yield
+    finally:
+        csv.field_size_limit(previous)

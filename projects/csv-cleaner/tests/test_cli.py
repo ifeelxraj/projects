@@ -87,3 +87,13 @@ class CleanerTests(unittest.TestCase):
             rc, out, err = run(command, "--trim-header", text=" id,id \n1,2")
             self.assertEqual((rc, out), (1, ""))
             self.assertIn("duplicate header", err)
+
+
+class ResourceTests(unittest.TestCase):
+    def test_field_limit_applies_to_input_and_is_restored_after_error(self):
+        import csv
+        old = csv.field_size_limit()
+        self.assertEqual(run("validate", "--field-limit", "3", text="key\n1234")[0], 1)
+        self.assertEqual(csv.field_size_limit(), old)
+        self.assertEqual(run("validate", text="key\n1234")[0], 0)
+        self.assertEqual(run("schema", "--field-limit", "3", text="longname")[0], 1)

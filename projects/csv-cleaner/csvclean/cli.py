@@ -7,7 +7,7 @@ from .schema import rules_for
 from .transform import CellEdits
 from .layout import OptionError
 from .cleaner import clean_table
-from .streams import input_stream, output_stream
+from .streams import field_limit, input_stream, output_stream
 from .reader import Problem, Table, audit
 
 
@@ -15,6 +15,7 @@ DIALECTS = {"comma": ",", "tab": "\t", "semicolon": ";", "pipe": "|"}
 
 
 def source_options(command):
+    command.add_argument("--field-limit", type=positive, metavar="CHARS", help="maximum characters per input field")
     command.add_argument("input", nargs="?", default="-", help="UTF-8 file or - for stdin")
     command.add_argument("--trim-header", action="store_true", help="strip names before duplicate checks")
     command.add_argument("--skip-blank", action="store_true", help="ignore empty physical records")
@@ -75,7 +76,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     options = dict(delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
                    trim_header=args.trim_header)
     try:
-        with input_stream(args.input, stdin) as source:
+        with field_limit(args.field_limit), input_stream(args.input, stdin) as source:
             if args.command == "schema":
                 header = Table(source, **options).header
                 json.dump({"version": 1, "columns": header, "required": []}, stdout,
