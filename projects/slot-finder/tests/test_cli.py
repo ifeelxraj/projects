@@ -44,3 +44,8 @@ class SlotTests(unittest.TestCase):
     def test_limit_applies_across_all_windows_in_chronological_order(self):
         args = ("slots", "--window", "14:00-15:00", "--window", "09:00-09:15", "--duration", "15")
         self.assertEqual(run(*args, "--limit", "2")[1], "09:00-09:15\n14:00-14:15\n")
+
+    def test_nearest_ranking_precedes_limit_and_breaks_ties_earlier(self):
+        rc, out, _ = run("slots", "--window", "10:00-11:00", "--step", "10", "--duration", "10",
+                         "--near", "10:35", "--limit", "2")
+        self.assertEqual((rc, out), (0, "10:30-10:40\n10:40-10:50\n"))

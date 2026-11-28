@@ -51,6 +51,7 @@ def parser():
     slots = commands.add_parser("slots", help="list fixed-length meetings inside free blocks")
     schedule_options(slots)
     slots.add_argument("--duration", type=positive_minutes, required=True, metavar="MINUTES")
+    slots.add_argument("--near", type=minute, metavar="HH:MM", help="prefer starts nearest this time")
     slots.add_argument("--limit", type=result_limit, metavar="N", help="emit at most N slots")
     slots.add_argument("--anchor", type=minute, default=0, metavar="HH:MM", help="grid reference time (default midnight)")
     slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
@@ -66,6 +67,8 @@ def main(argv=None, *, stdout=None, stderr=None):
         blocks = (g for g in gaps if g.minutes >= args.min)
     else:
         blocks = candidates(gaps, args.duration, args.step, args.anchor)
+        if args.near is not None:
+            blocks = sorted(blocks, key=lambda block: (abs(block.start - args.near), block.start))
         if args.limit is not None:
             blocks = islice(blocks, args.limit)
     for block in blocks:
