@@ -40,3 +40,7 @@ class SlotTests(unittest.TestCase):
         rc, out, _ = run("slots", "--duration", "10", "--step", "20", "--anchor", "09:05",
                          "--window", "09:00-10:00", "--busy", "09:18-09:27")
         self.assertEqual((rc, out), (0, "09:05-09:15\n09:45-09:55\n"))
+
+    def test_limit_applies_across_all_windows_in_chronological_order(self):
+        args = ("slots", "--window", "14:00-15:00", "--window", "09:00-09:15", "--duration", "15")
+        self.assertEqual(run(*args, "--limit", "2")[1], "09:00-09:15\n14:00-14:15\n")
