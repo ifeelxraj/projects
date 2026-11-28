@@ -49,3 +49,7 @@ class SlotTests(unittest.TestCase):
         rc, out, _ = run("slots", "--window", "10:00-11:00", "--step", "10", "--duration", "10",
                          "--near", "10:35", "--limit", "2")
         self.assertEqual((rc, out), (0, "10:30-10:40\n10:40-10:50\n"))
+
+    def test_packing_returns_back_to_back_appointments_not_alternatives(self):
+        rc, out, _ = run("slots", "--window", "10:00-11:00", "--step", "5", "--duration", "20", "--non-overlap")
+        self.assertEqual((rc, out), (0, "10:00-10:20\n10:20-10:40\n10:40-11:00\n"))

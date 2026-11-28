@@ -3,7 +3,7 @@ from itertools import islice
 import sys
 
 from .availability import available_across
-from .slots import candidates
+from .slots import candidates, non_overlapping
 from .time import minute, span
 
 
@@ -51,7 +51,9 @@ def parser():
     slots = commands.add_parser("slots", help="list fixed-length meetings inside free blocks")
     schedule_options(slots)
     slots.add_argument("--duration", type=positive_minutes, required=True, metavar="MINUTES")
-    slots.add_argument("--near", type=minute, metavar="HH:MM", help="prefer starts nearest this time")
+    ordering = slots.add_mutually_exclusive_group()
+    ordering.add_argument("--non-overlap", action="store_true", help="pack nonoverlapping meetings chronologically")
+    ordering.add_argument("--near", type=minute, metavar="HH:MM", help="prefer starts nearest this time")
     slots.add_argument("--limit", type=result_limit, metavar="N", help="emit at most N slots")
     slots.add_argument("--anchor", type=minute, default=0, metavar="HH:MM", help="grid reference time (default midnight)")
     slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
@@ -69,6 +71,8 @@ def main(argv=None, *, stdout=None, stderr=None):
         blocks = candidates(gaps, args.duration, args.step, args.anchor)
         if args.near is not None:
             blocks = sorted(blocks, key=lambda block: (abs(block.start - args.near), block.start))
+        if args.non_overlap:
+            blocks = non_overlapping(blocks)
         if args.limit is not None:
             blocks = islice(blocks, args.limit)
     for block in blocks:
