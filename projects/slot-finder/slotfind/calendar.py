@@ -16,8 +16,8 @@ class Booking:
     interval: Span
     status: str = "busy"
 
-    def blocks(self):
-        return self.status in ("busy", "tentative")
+    def blocks(self, *, ignore_tentative=False):
+        return self.status == "busy" or (self.status == "tentative" and not ignore_tentative)
 
 
 def located_rows(stream, source):

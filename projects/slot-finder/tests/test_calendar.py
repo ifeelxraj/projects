@@ -47,3 +47,10 @@ class CalendarTests(unittest.TestCase):
         args = ("free", "--resource", "X", "--calendar", "-", "--window", "09:00-12:00")
         self.assertEqual(run(*args, text=data)[1], "09:00-11:00\n")
         self.assertEqual(run(*args, text=data.replace("free", "typo"))[0], 1)
+
+    def test_ignoring_tentative_bookings_never_unblocks_confirmed_time(self):
+        from test_cli import run
+        data = "resource,start,end,status\nA,09:00,10:00,tentative\nB,09:30,09:45,busy"
+        args = ("free", "--calendar", "-", "--window", "09:00-10:00")
+        self.assertEqual(run(*args, text=data)[1], "")
+        self.assertEqual(run(*args, "--ignore-tentative", text=data)[1], "09:00-09:30\n09:45-10:00\n")
