@@ -23,6 +23,7 @@ def source_options(command):
 
 
 def rule_options(command):
+    command.add_argument("--order-by", action="append", default=[], metavar="NAME", help="check ascending text keys")
     command.add_argument("--schema", metavar="FILE", help="read additional column rules from JSON")
     command.add_argument("--decimal", metavar="NAME", action="append", default=[], help="check plain decimal text")
     command.add_argument("--date", metavar="NAME", action="append", default=[], help="check ISO calendar dates")
@@ -83,7 +84,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
                           ensure_ascii=False, indent=2)
                 stdout.write("\n")
                 return 0
-            options["rules"] = rules_for(args)
+            options.update(rules=rules_for(args), order_by=args.order_by)
             if args.command == "profile":
                 json.dump(profile(source, only=args.only, **options), stdout, ensure_ascii=False)
                 stdout.write("\n")

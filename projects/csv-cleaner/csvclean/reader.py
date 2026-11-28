@@ -4,6 +4,7 @@ import csv
 from dataclasses import dataclass, field
 
 
+from .layout import OptionError, compile_layout
 from .rules import Rules, apply_checks
 
 
@@ -67,14 +68,21 @@ def check_width(row, header):
 class Table:
     """A single-pass table. Ordinary iteration yields checked records only."""
 
-    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules()):
+    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules(), order_by=()):
         self.rows = records(stream, delimiter, skip_blank=skip_blank)
         self.header = read_header(self.rows, trim=trim_header, expected=rules.columns)
         self.checks = rules.bind(self.header)
+        self.key = compile_layout(self.header, keep=order_by) if order_by else None
+        self.previous_key = None
 
     def check(self, row):
         check_width(row, self.header)
         apply_checks(row, self.checks)
+        if self.key:
+            previous, current = self.previous_key, self.key.select(row.fields)
+            self.previous_key = current
+            if previous is not None and current < previous:
+                raise row.problem("sort key decreases relative to the preceding valid row")
 
     def __iter__(self):
         for row in self.rows:
