@@ -48,3 +48,27 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(run(*cmd, text=data)[1], "C\n")
         self.assertEqual(run(*cmd, "--busy", "09:15-09:20", text=data)[1], "")
         self.assertEqual(run(*cmd, "--window", "10:00-12:00", text=data)[1], "")
+
+    def test_resource_and_group_answers_match_independent_minute_sets(self):
+        import random
+        rng = random.Random(453)
+        work = Span(5, 55)
+        for _ in range(120):
+            names = ("A", "B", "C")
+            entries = [Booking(n, Span(*sorted(rng.sample(range(61), 2))),
+                               rng.choice(["busy", "tentative", "free"])) for n in names]
+            manual = Span(*sorted(rng.sample(range(61), 2)))
+            query = Span(*sorted(rng.sample(range(61), 2)))
+            before, after = rng.randrange(5), rng.randrange(4)
+            ignore = rng.choice([True, False])
+            plan = prepare([work], [manual], entries, before=before, after=after, ignore_tentative=ignore)
+            needed = set(range(query.start, query.end))
+            expected = []
+            for event in entries:
+                occupied = set(range(manual.start - before, manual.end + after))
+                if event.status == "busy" or (event.status == "tentative" and not ignore):
+                    occupied.update(range(event.interval.start - before, event.interval.end + after))
+                if needed.issubset(range(work.start, work.end)) and needed.isdisjoint(occupied):
+                    expected.append(event.resource)
+            self.assertEqual(plan.available_resources(query), expected)
+            self.assertEqual(plan.explain(query)["available"], len(expected) == len(names))
