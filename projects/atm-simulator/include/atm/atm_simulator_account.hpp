@@ -1,6 +1,6 @@
 #pragma once
 
-#include "atm/money.hpp"
+#include "atm/atm_simulator_money.hpp"
 
 #include <cstddef>
 #include <deque>

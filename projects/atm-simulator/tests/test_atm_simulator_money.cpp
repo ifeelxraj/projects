@@ -1,5 +1,5 @@
-#include "atm/money.hpp"
-#include "check.hpp"
+#include "atm/atm_simulator_money.hpp"
+#include "atm_simulator_test_checks.hpp"
 
 int main() {
     using atm::format_amount;

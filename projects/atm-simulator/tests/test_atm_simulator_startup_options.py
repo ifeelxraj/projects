@@ -1,6 +1,6 @@
 import unittest
 
-from terminal_driver import DEMO_PIN, invoke
+from atm_simulator_test_terminal_driver import DEMO_PIN, invoke
 
 
 class StartupOptionsTests(unittest.TestCase):

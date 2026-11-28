@@ -1,7 +1,7 @@
-#include "session.hpp"
+#include "atm_simulator_session.hpp"
 
-#include "atm/account.hpp"
-#include "atm/pin.hpp"
+#include "atm/atm_simulator_account.hpp"
+#include "atm/atm_simulator_pin.hpp"
 
 #include <istream>
 #include <optional>

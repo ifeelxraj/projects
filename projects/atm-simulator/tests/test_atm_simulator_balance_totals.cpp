@@ -1,5 +1,5 @@
-#include "atm/account.hpp"
-#include "check.hpp"
+#include "atm/atm_simulator_account.hpp"
+#include "atm_simulator_test_checks.hpp"
 
 #include <algorithm>
 #include <random>
