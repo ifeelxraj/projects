@@ -1,6 +1,6 @@
 import sys
 
-from .cli import main
+from .csv_cleaner_commands import main
 
 
 def entrypoint():

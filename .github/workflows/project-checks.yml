@@ -14,7 +14,7 @@ jobs:
           persist-credentials: false
       - name: Check project index and tooling
         run: |
-          python3 tools/check_index.py
+          python3 tools/projects_catalog_check.py
           python3 -m unittest discover -s tools/tests
 
   atm:

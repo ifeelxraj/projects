@@ -6,4 +6,4 @@ test:
 	$(PYTHON) -m unittest discover -s tests
 
 demo:
-	sh examples/stock-recipe.sh
+	sh examples/csv-cleaner-stock-demo.sh

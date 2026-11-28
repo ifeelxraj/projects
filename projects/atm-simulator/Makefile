@@ -27,7 +27,7 @@ clean:
 UNIT_SOURCES := $(wildcard tests/test_*.cpp)
 UNIT_BINS := $(patsubst tests/%.cpp,$(BUILD)/%,$(UNIT_SOURCES))
 
-$(BUILD)/%: tests/%.cpp tests/check.hpp $(HEADERS) Makefile | $(BUILD)
+$(BUILD)/%: tests/%.cpp tests/atm_simulator_test_checks.hpp $(HEADERS) Makefile | $(BUILD)
 	$(CXX) $(CPPFLAGS) -Iinclude $(CXXFLAGS) $(CHECK_FLAGS) -std=c++17 $< $(LDFLAGS) -o $@
 
 test: $(BUILD)/atm $(UNIT_BINS)
@@ -39,4 +39,4 @@ test-ubsan:
 
 .PHONY: demo
 demo: $(BUILD)/atm
-	./$(BUILD)/atm --opening-balance 25.00 --cash-limit 7.00 < examples/mini-statement.in
+	./$(BUILD)/atm --opening-balance 25.00 --cash-limit 7.00 < examples/atm-simulator-mini-statement.in

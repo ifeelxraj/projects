@@ -3,7 +3,7 @@
 ## Start from the checkout, not a quota
 
 ```sh
-python3 tools/run_brief.py
+python3 tools/projects_daily_brief.py
 start=$(git rev-parse HEAD)
 branch=$(git branch --show-current)
 ```
@@ -19,7 +19,7 @@ change, understand it before editing; never discard someone else's work.
 - Finish the active project first. When it is complete, give the next project
   its own `projects/<name>/` directory and a README with setup and usage.
 - Register it in the root table: local project link in the `Project` column,
-  current state in the `Status` column. Run `python3 tools/check_index.py`.
+  current state in the `Status` column. Run `python3 tools/projects_catalog_check.py`.
 - Aim for 40 substantive increments per day, not 40 edits to a counter. A
   feature, a boundary-case test, or a verified example can stand on its own.
   Make each small change runnable, review its diff, and use a descriptive
@@ -32,6 +32,20 @@ change, understand it before editing; never discard someone else's work.
   data, caches and binaries out of Git.
 - Use actual work times. Do not backdate, rewrite, force-push, or generate a
   batch of cosmetic changes to meet the target.
+
+## Name files for readers browsing GitHub
+
+Use the project name **and** the file's job. For example, use
+`slot_finder_calendar_reader.py` rather than `reader.py`, and
+`test_slot_finder_calendar_import.py` for its tests. Keep `test_` first so
+automatic test discovery still works. Use the project slug in launcher, example
+and supplementary guide names, such as `csv-cleaner-stock-demo.sh`.
+
+Keep conventional files (`README.md`, `Makefile`, `__init__.py`, `__main__.py`)
+and dated logs under their expected names. Shared maintenance scripts use
+`projects_`; an example connecting two projects names both. When renaming a
+file, update imports, sample commands, CI paths and links in the same change.
+Give each project README a short “where to start reading” section.
 
 ## Stop or hand off
 

@@ -5,6 +5,24 @@ mini-statement. Everything is local to one process: no bank connection, real
 money, files of account data, or SMS recovery. **Use a made-up PIN.** Input is
 visible as you type; this is a classroom simulation, not an authentication system.
 
+## Where to start reading
+
+Start with the [terminal menu](src/atm_simulator_session.cpp) if you want to see
+what a customer can do. Follow a withdrawal into the account file to see why
+it succeeds or is declined.
+
+| File | What it does |
+| --- | --- |
+| [atm_simulator_main.cpp](src/atm_simulator_main.cpp) | Starts the program and sets the opening balance and optional cash limit. |
+| [atm_simulator_session.cpp](src/atm_simulator_session.cpp) | Runs sign-in, the menu and the prompts. The [matching header](src/atm_simulator_session.hpp) declares how to start a session. |
+| [atm_simulator_account.hpp](include/atm/atm_simulator_account.hpp) | Changes the balance and remembers the last ten successful transactions. |
+| [atm_simulator_money.hpp](include/atm/atm_simulator_money.hpp) | Reads and prints amounts in exact cents. |
+| [atm_simulator_pin.hpp](include/atm/atm_simulator_pin.hpp) | Checks that a demo PIN has four digits. |
+| [atm-simulator-mini-statement.in](examples/atm-simulator-mini-statement.in) | Sample keystrokes for `make demo`, not program code. |
+
+The [tests](tests/) check the feature named after `test_atm_simulator_` in each
+filename. You do not need to open them to run the simulator.
+
 ## Build and run
 
 You need GNU Make and a C++17 compiler. From the repository root:
@@ -51,7 +69,7 @@ means normal exit, help or EOF; `1` means three sign-in attempts failed;
 
 ## Replay a session
 
-`make demo` feeds [a sample input stream](examples/mini-statement.in) to the
+`make demo` feeds [a sample input stream](examples/atm-simulator-mini-statement.in) to the
 binary. It starts at `25.00`, deposits `2.75`, withdraws `5.20`, locks, then
 signs back in to display these statement rows:
 
@@ -69,7 +87,3 @@ make test         # C++ unit suites + Python 3 end-to-end tests; no packages nee
 make test-ubsan   # same checks with the compiler's undefined-behavior sanitizer
 make clean        # remove this project's build/ directory
 ```
-
-`include/atm/` holds the decimal, account and PIN rules. `src/main.cpp` handles
-startup arguments; `src/session.cpp` drives the interactive session. Tests
-exercise both the model and the compiled program, including the replay above.

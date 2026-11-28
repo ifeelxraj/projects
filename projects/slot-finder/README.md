@@ -1,22 +1,45 @@
 # Slot finder
 
-Find a time when all selected resources are free, or find an individual room
-that can host a particular meeting. It reads local files only: no account,
-calendar API, timezone conversion or booking side effects. Python 3.9+, no install.
+Give it working hours and a list of bookings. It shows when everyone is free,
+or which room can host a meeting at a time you choose. It reads local files;
+it does not connect to a calendar, make reservations or convert time zones.
+Python 3.9+, no install.
 
 ```sh
 cd projects/slot-finder
-./find-slots free --window 09:00-12:00 --busy 10:00-10:30
+./slot-finder free --window 09:00-12:00 --busy 10:00-10:30
 make demo
 make test
 ```
 
-The demo reads [a fictional shared morning](examples/shared-morning.csv) and
+The demo reads [a fictional shared morning](examples/slot-finder-morning-bookings.csv) and
 returns two 30-minute alternatives nearest 10:00: **10:00–10:30** and
 **09:45–10:15**. Overlap between alternatives is intentional. Use
 `--non-overlap` instead of `--near` to build an actual sequence of appointments.
 The launcher also works from another directory; `python3 -m slotfind` works
 from the project root. Each command has its own `--help`.
+
+The runnable file is now named `slot-finder` (previously `find-slots`). The
+`make` targets, `python3 -m slotfind`, and command options are unchanged.
+
+## Where to start reading
+
+To see how a 30-minute meeting gets suggested, start with **free time**: the
+planner first removes booked minutes, then tries possible meeting starts in
+the gaps that remain.
+
+| File | What it does |
+| --- | --- |
+| [slot-finder](slot-finder) → [slot_finder_commands.py](slotfind/slot_finder_commands.py) | Starts the program and handles questions like `free`, `slots` and `rooms`. |
+| [slot_finder_calendar_reader.py](slotfind/slot_finder_calendar_reader.py) | Reads the room names and booking times from a calendar CSV. |
+| [slot_finder_time_ranges.py](slotfind/slot_finder_time_ranges.py) | Converts `09:15` to minutes and represents a start/end pair. |
+| [slot_finder_free_time.py](slotfind/slot_finder_free_time.py) | Subtracts booked periods from working hours. |
+| [slot_finder_meeting_slots.py](slotfind/slot_finder_meeting_slots.py) | Finds meeting starts that fit completely inside a free block. |
+| [slot_finder_schedule.py](slotfind/slot_finder_schedule.py) | Brings working hours, rooms and bookings together to answer queries. |
+| [slot_finder_output.py](slotfind/slot_finder_output.py) | Prints the answers as text, JSON or CSV. |
+
+The [examples](examples/) contain sample bookings and a command to try. The
+[tests](tests/) are named `test_slot_finder_` plus the feature they check.
 
 ## Queries
 
@@ -29,9 +52,9 @@ from the project root. Each command has its own `--help`.
 | `rooms START-END` | Which individual resources can host the **whole** request? Two rooms free for half each are not a match. |
 
 ```sh
-./find-slots rooms 10:30-11:00 --calendar examples/shared-morning.csv
-./find-slots explain 10:25-10:30 --before 5m --calendar examples/shared-morning.csv
-./find-slots summary --window 09:00-12:00 --calendar examples/shared-morning.csv --duration 30m --format json
+./slot-finder rooms 10:30-11:00 --calendar examples/slot-finder-morning-bookings.csv
+./slot-finder explain 10:25-10:30 --before 5m --calendar examples/slot-finder-morning-bookings.csv
+./slot-finder summary --window 09:00-12:00 --calendar examples/slot-finder-morning-bookings.csv --duration 30m --format json
 ```
 
 ## Inputs and outputs
@@ -51,4 +74,4 @@ from the project root. Each command has its own `--help`.
   Status `1` means malformed calendar data; `2` means bad arguments, encoding,
   unknown resource or unreadable input. Diagnostics use stderr.
 
-See [Calendar contract and scheduling math](CALENDARS.md) for import details, boundary rules and ranking.
+See [Calendar contract and scheduling math](slot-finder-calendar-guide.md) for import details, boundary rules and ranking.
