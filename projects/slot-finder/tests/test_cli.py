@@ -35,3 +35,8 @@ class SlotTests(unittest.TestCase):
         rc, out, _ = run("slots", "--duration", "20", "--step", "10", "--window", "09:00-10:00",
                          "--busy", "09:30-09:40")
         self.assertEqual((rc, out), (0, "09:00-09:20\n09:10-09:30\n09:40-10:00\n"))
+
+    def test_grid_reference_does_not_reset_at_each_busy_period(self):
+        rc, out, _ = run("slots", "--duration", "10", "--step", "20", "--anchor", "09:05",
+                         "--window", "09:00-10:00", "--busy", "09:18-09:27")
+        self.assertEqual((rc, out), (0, "09:05-09:15\n09:45-09:55\n"))

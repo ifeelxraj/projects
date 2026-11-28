@@ -3,7 +3,7 @@ import sys
 
 from .availability import available_across
 from .slots import candidates
-from .time import span
+from .time import minute, span
 
 
 def interval_arg(text):
@@ -43,6 +43,7 @@ def parser():
     slots = commands.add_parser("slots", help="list fixed-length meetings inside free blocks")
     schedule_options(slots)
     slots.add_argument("--duration", type=positive_minutes, required=True, metavar="MINUTES")
+    slots.add_argument("--anchor", type=minute, default=0, metavar="HH:MM", help="grid reference time (default midnight)")
     slots.add_argument("--step", type=positive_minutes, default=15, metavar="MINUTES")
     return root
 
@@ -55,7 +56,7 @@ def main(argv=None, *, stdout=None, stderr=None):
     if args.command == "free":
         blocks = (g for g in gaps if g.minutes >= args.min)
     else:
-        blocks = candidates(gaps, args.duration, args.step)
+        blocks = candidates(gaps, args.duration, args.step, args.anchor)
     for block in blocks:
         print(block, file=stdout)
     return 0
