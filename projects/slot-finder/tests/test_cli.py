@@ -24,3 +24,7 @@ class FreeTests(unittest.TestCase):
         self.assertEqual(run("free", "--window", "00:00-24:00", "--busy", "00:01-01:00",
                              "--busy", "23:00-23:59", "--before", "10", "--after", "5")[1],
                          "01:05-22:50\n")
+
+    def test_multiple_work_windows_leave_lunch_unavailable(self):
+        self.assertEqual(run("free", "--window", "09:00-12:00", "--window", "13:00-17:00",
+                             "--busy", "11:45-13:20")[1], "09:00-11:45\n13:20-17:00\n")

@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from .availability import available
+from .availability import available_across
 from .time import span
 
 
@@ -29,7 +29,7 @@ def nonnegative_minutes(text):
 def schedule_options(cmd):
     cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
     cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
-    cmd.add_argument("--window", type=interval_arg, default=span("09:00-17:00"), metavar="START-END")
+    cmd.add_argument("--window", type=interval_arg, action="append", default=[], metavar="START-END")
     cmd.add_argument("--busy", type=interval_arg, action="append", default=[], metavar="START-END")
 
 
@@ -46,7 +46,7 @@ def main(argv=None, *, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
     busy = (period.padded(args.before, args.after) for period in args.busy)
-    for block in available(args.window, busy):
+    for block in available_across(args.window or [span("09:00-17:00")], busy):
         if block.minutes >= args.min:
             print(block, file=stdout)
     return 0

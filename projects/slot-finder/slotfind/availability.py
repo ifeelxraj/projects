@@ -13,14 +13,25 @@ def union(intervals):
     return merged
 
 
-def available(window, busy):
-    """Subtract the union of in-window bookings from the work window."""
+def available_across(windows, busy):
+    """Subtract two unions with forward-only cursors, including split shifts."""
+    stops = union(busy)
     gaps = []
-    cursor = window.start
-    for stop in union(part for item in busy if (part := window.intersect(item))):
-        if cursor < stop.start:
-            gaps.append(Span(cursor, stop.start))
-        cursor = stop.end
-    if cursor < window.end:
-        gaps.append(Span(cursor, window.end))
+    i = 0
+    for window in union(windows):
+        cursor = window.start
+        while i < len(stops) and stops[i].start < window.end:
+            stop = stops[i]
+            if cursor < stop.start:
+                gaps.append(Span(cursor, stop.start))
+            cursor = max(cursor, stop.end)
+            if stop.end > window.end:
+                break  # This booking may extend into the next work window.
+            i += 1
+        if cursor < window.end:
+            gaps.append(Span(cursor, window.end))
     return gaps
+
+
+def available(window, busy):
+    return available_across([window], busy)
