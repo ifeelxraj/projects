@@ -26,6 +26,10 @@ class Rules:
 
     def bind(self, header):
         positions = {name: i for i, name in enumerate(header)}
+        numeric = set(self.integer).union(self.decimal)
+        conflicting = numeric.intersection(self.date)
+        if conflicting:
+            raise OptionError(f"column cannot be both numeric and a date: {min(conflicting)!r}")
         checks = []
         groups = [
             (self.required, "must not be blank", lambda v: bool(v.strip())),

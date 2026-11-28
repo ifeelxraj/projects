@@ -44,3 +44,7 @@ class SchemaTests(unittest.TestCase):
             rc, _, err = run("clean", "--schema", str(path), text="id\n42")
             self.assertEqual(rc, 2)
             self.assertIn("duplicate schema key", err)
+
+    def test_conflicting_cli_and_file_types_are_configuration_errors(self):
+        self.assertEqual(self.check({"version": 1, "date": ["v"]}, "v\n2000-01-01", "--integer", "v")[0], 2)
+        self.assertEqual(self.check({"version": 1, "decimal": ["v"]}, "v\n42", "--integer", "v")[0], 0)
