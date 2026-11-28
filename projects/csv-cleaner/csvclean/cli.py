@@ -32,6 +32,7 @@ def parser():
     check.add_argument("--max-errors", type=positive, default=1)
     clean = commands.add_parser("clean", help="write canonical CSV after checking each row")
     source_options(clean)
+    clean.add_argument("--replace", action="store_true", help="allow atomic replacement of a different file")
     clean.add_argument("-o", "--output", default="-", help="new output path or - for stdout")
     return root
 
@@ -44,7 +45,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     try:
         with input_stream(args.input, stdin) as source:
             if args.command == "clean":
-                with output_stream(args.output, stdout) as target:
+                with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
                     clean_table(source, target, delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank)
                 return 0
             report = audit(source, DIALECTS[args.delimiter], skip_blank=args.skip_blank,

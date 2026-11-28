@@ -1,4 +1,7 @@
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
+import os
+from pathlib import Path
+import tempfile
 
 
 def input_stream(path, fallback):
@@ -8,19 +11,20 @@ def input_stream(path, fallback):
     return open(path, encoding="utf-8-sig", newline="")
 
 
-from contextlib import contextmanager
-import os
-from pathlib import Path
-import tempfile
-
 
 @contextmanager
-def output_stream(path, fallback):
+def output_stream(path, fallback, *, replace=False, input_path="-"):
     if path == "-":
+        if replace:
+            raise OSError("--replace needs a named output")
         yield fallback
         return
     dest = Path(path)
-    if os.path.lexists(dest):
+    if replace and dest.is_symlink():
+        raise OSError("refusing to replace a symbolic link")
+    if replace and input_path != "-" and dest.exists() and os.path.samefile(input_path, dest):
+        raise OSError("input and output refer to the same file")
+    if not replace and os.path.lexists(dest):
         raise FileExistsError(f"output already exists: {dest}")
     temp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="",
                                        dir=dest.parent, prefix=".csvclean-", delete=False)
@@ -28,6 +32,9 @@ def output_stream(path, fallback):
         with temp:
             yield temp
         # Linking rather than renaming makes the no-clobber check atomic.
-        os.link(temp.name, dest)
+        if replace:
+            os.replace(temp.name, dest)
+        else:
+            os.link(temp.name, dest)
     finally:
         Path(temp.name).unlink(missing_ok=True)

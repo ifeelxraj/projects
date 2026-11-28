@@ -15,3 +15,24 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), b"a\r\n1\r\n")
             self.assertEqual(run("clean", "-o", str(path), text="x\n2")[0], 2)
             self.assertEqual(path.read_bytes(), b"a\r\n1\r\n")
+
+    def test_replace_preserves_old_contents_on_late_validation_failure(self):
+        with TemporaryDirectory() as d:
+            dest = Path(d) / "out.csv"
+            dest.write_bytes(b"keep")
+            cmd = ("clean", "--replace", "-o", str(dest))
+            self.assertEqual(run(*cmd, text="a,b\n1,2\n3")[0], 1)
+            self.assertEqual(dest.read_bytes(), b"keep")
+            self.assertEqual(run(*cmd, text="a\n1")[0], 0)
+            self.assertEqual(dest.read_bytes(), b"a\r\n1\r\n")
+
+    def test_replace_rejects_an_alias_of_the_input(self):
+        import os
+        with TemporaryDirectory() as d:
+            source, dest = Path(d) / "source.csv", Path(d) / "alias.csv"
+            source.write_bytes(b"a\noriginal\n")
+            os.link(source, dest)
+            rc, _, err = run("clean", str(source), "-o", str(dest), "--replace")
+            self.assertEqual(rc, 2)
+            self.assertIn("same file", err)
+            self.assertEqual(dest.read_bytes(), source.read_bytes())
