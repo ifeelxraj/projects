@@ -6,6 +6,7 @@ Each project lives in `projects/` and has its own setup instructions.
 | --- | --- | --- | --- |
 | [ATM simulator](projects/atm-simulator/) | Practice deposits, withdrawals and reconciliation against a ten-entry mini-statement. | C++17 | Complete |
 | [CSV cleaner](projects/csv-cleaner/) | Validate and clean delimited tables without loading them into memory. | Python | Complete |
+| [Slot finder](projects/slot-finder/) | Find shared free time in a local working day. | Python | In progress |
 
 ## Try the simulator
 
