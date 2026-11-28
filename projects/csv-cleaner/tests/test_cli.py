@@ -42,3 +42,10 @@ class ValidateTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn("1 data rows", out)
         self.assertEqual(run("validate", text="label\n\n")[0], 1)
+
+    def test_bounded_diagnostics_stop_at_the_requested_number(self):
+        rc, _, err = run("validate", "--max-errors", "2", text="a,b\n1\n2,ok\n3,x,y\n4\n")
+        self.assertEqual(rc, 1)
+        self.assertIn("line 2:", err)
+        self.assertIn("line 4:", err)
+        self.assertNotIn("line 5:", err)

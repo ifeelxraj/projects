@@ -1,7 +1,7 @@
 """Read logical records while retaining their physical source locations."""
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class Problem(ValueError):
@@ -58,11 +58,38 @@ def check_width(row, header):
         raise row.problem(f"expected {len(header)} fields, found {len(row.fields)}")
 
 
+@dataclass
+class Report:
+    header: tuple = ()
+    examined: int = 0
+    problems: list = field(default_factory=list)
+    stopped: bool = False
+
+
+def audit(stream, delimiter=",", *, skip_blank=False, max_errors=1):
+    if max_errors < 1:
+        raise ValueError("max_errors must be positive")
+    result = Report()
+    try:
+        rows = records(stream, delimiter, skip_blank=skip_blank)
+        result.header = read_header(rows)
+        for row in rows:
+            result.examined += 1
+            try:
+                check_width(row, result.header)
+            except Problem as exc:
+                result.problems.append(exc)
+                if len(result.problems) >= max_errors:
+                    result.stopped = True
+                    break
+    except Problem as exc:  # Bad quoting or an unusable header cannot be recovered.
+        result.problems.append(exc)
+        result.stopped = True
+    return result
+
+
 def validate(stream, delimiter=",", *, skip_blank=False):
-    rows = records(stream, delimiter, skip_blank=skip_blank)
-    header = read_header(rows)
-    count = 0
-    for row in rows:
-        check_width(row, header)
-        count += 1
-    return header, count
+    report = audit(stream, delimiter, skip_blank=skip_blank)
+    if report.problems:
+        raise report.problems[0]
+    return report.header, report.examined
