@@ -23,3 +23,13 @@ class ProcessTests(unittest.TestCase):
     def test_bom_and_crlf_work_on_a_real_pipe(self):
         result = invoke("free", "--calendar", "-", data=b"\xef\xbb\xbfresource,start,end\r\nX,09:00,10:00\r\n")
         self.assertEqual((result.returncode, result.stdout), (0, b"10:00-17:00\n"))
+
+    def test_standalone_launcher_reads_paths_relative_to_caller(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        script = Path(__file__).resolve().parents[1] / "find-slots"
+        with TemporaryDirectory() as d:
+            (Path(d) / "bookings.csv").write_text("resource,start,end\nA,09:00,09:30", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(script), "free", "--calendar", "bookings.csv"],
+                                    cwd=d, capture_output=True, timeout=5)
+            self.assertEqual((result.returncode, result.stdout), (0, b"09:30-17:00\n"))

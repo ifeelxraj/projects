@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+from slotfind.__main__ import entrypoint
+
+raise SystemExit(entrypoint())
