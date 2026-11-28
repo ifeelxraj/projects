@@ -1,5 +1,6 @@
 """Minute precision in one local day. No dates, time zones or implicit rollover."""
 
+from dataclasses import dataclass
 import re
 
 DAY = 24 * 60
@@ -22,9 +23,6 @@ def clock(value):
     return f"{value // 60:02d}:{value % 60:02d}"
 
 
-from dataclasses import dataclass
-
-
 @dataclass(frozen=True, order=True)
 class Span:
     start: int
@@ -37,6 +35,13 @@ class Span:
     @property
     def minutes(self):
         return self.end - self.start
+
+    def intersect(self, other):
+        lo, hi = max(self.start, other.start), min(self.end, other.end)
+        return Span(lo, hi) if lo < hi else None
+
+    def contains(self, other):
+        return self.start <= other.start and other.end <= self.end
 
     def __str__(self):
         return f"{clock(self.start)}-{clock(self.end)}"

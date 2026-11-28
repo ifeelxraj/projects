@@ -25,3 +25,11 @@ class SpanTests(unittest.TestCase):
         for text in ("09:00-09:00", "22:00-03:30", "09:00-10:00-11:00", "24:00-24:00"):
             with self.assertRaises(ValueError):
                 span(text)
+
+    def test_touching_intervals_do_not_conflict(self):
+        from slotfind.time import Span
+        work = Span(60, 120)
+        self.assertIsNone(work.intersect(Span(120, 140)))
+        self.assertEqual(work.intersect(Span(30, 70)), Span(60, 70))
+        self.assertTrue(work.contains(Span(60, 120)))
+        self.assertFalse(work.contains(Span(90, 121)))
