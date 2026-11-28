@@ -81,7 +81,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
             handle = nullcontext(stdin) if path == "-" else open(path, encoding="utf-8-sig", newline="")
             with handle as stream:
                 entries.extend(bookings(stream, path))
-        periods.extend(b.interval for b in select_bookings(entries, args.resource))
+        periods.extend(b.interval for b in select_bookings(entries, args.resource) if b.blocks())
     except SelectionError as exc:
         print(exc, file=stderr)
         return 2

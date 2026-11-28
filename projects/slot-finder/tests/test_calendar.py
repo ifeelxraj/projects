@@ -40,3 +40,10 @@ class CalendarTests(unittest.TestCase):
         rc, out, err = run(*cmd, "--resource", "missing", text=data)
         self.assertEqual((rc, out), (2, ""))
         self.assertIn("unknown resource", err)
+
+    def test_free_or_cancelled_rows_do_not_block_but_still_name_a_resource(self):
+        from test_cli import run
+        data = "resource,start,end,status\nX,09:00,10:00,free\nX,10:00,11:00,CANCELLED\nX,11:00,12:00,tentative"
+        args = ("free", "--resource", "X", "--calendar", "-", "--window", "09:00-12:00")
+        self.assertEqual(run(*args, text=data)[1], "09:00-11:00\n")
+        self.assertEqual(run(*args, text=data.replace("free", "typo"))[0], 1)

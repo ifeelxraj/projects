@@ -14,6 +14,10 @@ class CalendarError(ValueError):
 class Booking:
     resource: str
     interval: Span
+    status: str = "busy"
+
+    def blocks(self):
+        return self.status in ("busy", "tentative")
 
 
 def located_rows(stream, source):
@@ -52,7 +56,11 @@ def bookings(stream, source="stdin"):
             block = Span(minute(fields[idx["start"]].strip()), minute(fields[idx["end"]].strip()))
         except ValueError as exc:
             raise CalendarError(f"{location}: {exc}") from exc
-        yield Booking(name, block)
+        status = fields[idx["status"]].strip().lower() if "status" in idx else "busy"
+        status = status or "busy"
+        if status not in ("busy", "tentative", "free", "cancelled"):
+            raise CalendarError(f"{location}: unrecognized booking status")
+        yield Booking(name, block, status)
 
 
 class SelectionError(ValueError):
