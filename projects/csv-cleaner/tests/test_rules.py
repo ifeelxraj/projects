@@ -22,3 +22,7 @@ class RuleTests(unittest.TestCase):
         for value, code in [("2024-02-29", 0), ("2023-02-29", 1), ("20240102", 1), ("2024-W01-1", 1)]:
             with self.subTest(value=value):
                 self.assertEqual(run("validate", "--date", "d", text=f"d\n{value}\n")[0], code)
+
+    def test_decimal_rule_accepts_arbitrary_precision_but_not_special_values(self):
+        for value, code in [("-12.00000000000000001", 0), ("5", 0), ("1e2", 1), ("NaN", 1), ("inf", 1), ("1.", 1)]:
+            self.assertEqual(run("validate", "--decimal", "value", text=f"value\n{value}")[0], code)

@@ -21,12 +21,15 @@ class Rules:
     required: tuple = ()
     integer: tuple = ()
     date: tuple = ()
+    decimal: tuple = ()
 
     def bind(self, header):
         positions = {name: i for i, name in enumerate(header)}
         checks = []
         groups = [
             (self.required, "must not be blank", lambda v: bool(v.strip())),
+            (self.decimal, "must be a plain decimal",
+             lambda v: not v or re.fullmatch(r"[+-]?[0-9]+(?:\.[0-9]+)?", v)),
             (self.date, "must be a YYYY-MM-DD date", iso_date),
             (self.integer, "must be an integer", lambda v: not v or re.fullmatch(r"[+-]?[0-9]+", v)),
         ]
