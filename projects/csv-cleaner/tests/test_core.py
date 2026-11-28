@@ -39,3 +39,15 @@ class WidthTests(unittest.TestCase):
         from csvclean.reader import Problem, validate
         with self.assertRaisesRegex(Problem, "lines 2-3: expected 2 fields, found 1"):
             validate(io.StringIO('a,b\n"x\ny"\n'))
+
+
+class DialectBoundaryTests(unittest.TestCase):
+    def test_truncated_multiline_field_reports_its_record(self):
+        from csvclean.reader import Problem
+        with self.assertRaises(Problem) as caught:
+            list(source('a,b\r\n0,"open\r\nstill open'))
+        self.assertEqual((caught.exception.first, caught.exception.last), (2, 3))
+
+    def test_blank_record_differs_from_an_empty_quoted_value(self):
+        rows = list(source('\n""\n"a""b"'))
+        self.assertEqual([r.fields for r in rows], [(), ("",), ('a"b',)])
