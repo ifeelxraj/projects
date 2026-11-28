@@ -2,7 +2,7 @@ import argparse
 import json
 import sys
 
-from .rules import Rules
+from .schema import rules_for
 from .transform import CellEdits
 from .layout import OptionError
 from .cleaner import clean_table
@@ -21,6 +21,7 @@ def source_options(command):
 
 
 def rule_options(command):
+    command.add_argument("--schema", metavar="FILE", help="read additional column rules from JSON")
     command.add_argument("--decimal", metavar="NAME", action="append", default=[], help="check plain decimal text")
     command.add_argument("--date", metavar="NAME", action="append", default=[], help="check ISO calendar dates")
     command.add_argument("--integer", metavar="NAME", action="append", default=[], help="check signed ASCII integer text")
@@ -65,9 +66,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
     options = dict(delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                   trim_header=args.trim_header, rules=Rules(required=tuple(args.require), integer=tuple(args.integer), date=tuple(args.date),
-                                                            decimal=tuple(args.decimal)))
+                   trim_header=args.trim_header)
     try:
+        options["rules"] = rules_for(args)
         with input_stream(args.input, stdin) as source:
             if args.command == "clean":
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
