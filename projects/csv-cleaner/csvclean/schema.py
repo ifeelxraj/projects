@@ -9,10 +9,19 @@ from .rules import Rules
 RULE_KEYS = ("required", "integer", "decimal", "date")
 
 
+def unique_keys(pairs):
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise OptionError(f"duplicate schema key: {key!r}")
+        obj[key] = value
+    return obj
+
+
 def load_schema(path):
     try:
         with open(path, encoding="utf-8-sig") as stream:
-            data = json.load(stream)
+            data = json.load(stream, object_pairs_hook=unique_keys)
     except json.JSONDecodeError as exc:
         raise OptionError(f"schema line {exc.lineno}: {exc.msg}") from exc
     if not isinstance(data, dict) or type(data.get("version")) is not int or data["version"] != 1:

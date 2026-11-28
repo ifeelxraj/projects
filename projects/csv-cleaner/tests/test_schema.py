@@ -36,3 +36,11 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual((rc, err), (0, ""))
         self.assertNotIn("sampled", out)
         self.assertEqual(self.check(json.loads(out), "id,city\n1,Demo")[0], 0)
+
+    def test_duplicate_json_keys_cannot_silently_disable_a_check(self):
+        with TemporaryDirectory() as d:
+            path = Path(d) / "duplicate.json"
+            path.write_text('{"version":1,"required":["id"],"required":[]}', encoding="utf-8")
+            rc, _, err = run("clean", "--schema", str(path), text="id\n42")
+            self.assertEqual(rc, 2)
+            self.assertIn("duplicate schema key", err)
