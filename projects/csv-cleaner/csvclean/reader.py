@@ -21,7 +21,7 @@ class Record:
         return Problem(message, self.first, self.last)
 
 
-def records(stream, delimiter=","):
+def records(stream, delimiter=",", *, skip_blank=False):
     reader = csv.reader(stream, delimiter=delimiter, strict=True)
     while True:
         first = reader.line_num + 1
@@ -31,6 +31,8 @@ def records(stream, delimiter=","):
             return
         except csv.Error as exc:
             raise Problem(str(exc), first, max(first, reader.line_num)) from exc
+        if skip_blank and not values:
+            continue
         yield Record(first, reader.line_num, tuple(values))
 
 
@@ -56,8 +58,8 @@ def check_width(row, header):
         raise row.problem(f"expected {len(header)} fields, found {len(row.fields)}")
 
 
-def validate(stream, delimiter=","):
-    rows = records(stream, delimiter)
+def validate(stream, delimiter=",", *, skip_blank=False):
+    rows = records(stream, delimiter, skip_blank=skip_blank)
     header = read_header(rows)
     count = 0
     for row in rows:

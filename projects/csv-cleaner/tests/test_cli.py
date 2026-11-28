@@ -36,3 +36,9 @@ class ValidateTests(unittest.TestCase):
                 rc, out, _ = run("validate", "--delimiter", name, text=f'a{sep}b\n"x{sep}y"{sep}z')
                 self.assertEqual(rc, 0)
                 self.assertIn("2 columns", out)
+
+    def test_skip_blank_does_not_skip_quoted_empty_values(self):
+        rc, out, _ = run("validate", "--skip-blank", text='\nlabel\n\n""\n')
+        self.assertEqual(rc, 0)
+        self.assertIn("1 data rows", out)
+        self.assertEqual(run("validate", text="label\n\n")[0], 1)
