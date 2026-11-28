@@ -33,6 +33,20 @@ change, understand it before editing; never discard someone else's work.
 - Use actual work times. Do not backdate, rewrite, force-push, or generate a
   batch of cosmetic changes to meet the target.
 
+## Name files for readers browsing GitHub
+
+Use the project name **and** the file's job. For example, use
+`slot_finder_calendar_reader.py` rather than `reader.py`, and
+`test_slot_finder_calendar_import.py` for its tests. Keep `test_` first so
+automatic test discovery still works. Use the project slug in launcher, example
+and supplementary guide names, such as `csv-cleaner-stock-demo.sh`.
+
+Keep conventional files (`README.md`, `Makefile`, `__init__.py`, `__main__.py`)
+and dated logs under their expected names. Shared maintenance scripts use
+`projects_`; an example connecting two projects names both. When renaming a
+file, update imports, sample commands, CI paths and links in the same change.
+Give each project README a short “where to start reading” section.
+
 ## Stop or hand off
 
 On a failed check, Git error, auth problem or rate limit, **stop**. Append the
