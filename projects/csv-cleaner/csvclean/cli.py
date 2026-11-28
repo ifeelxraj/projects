@@ -12,6 +12,7 @@ DIALECTS = {"comma": ",", "tab": "\t", "semicolon": ";", "pipe": "|"}
 
 def source_options(command):
     command.add_argument("input", nargs="?", default="-", help="UTF-8 file or - for stdin")
+    command.add_argument("--trim-header", action="store_true", help="strip names before duplicate checks")
     command.add_argument("--skip-blank", action="store_true", help="ignore empty physical records")
     command.add_argument("--delimiter", choices=DIALECTS, default="comma")
 
@@ -49,10 +50,10 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
             if args.command == "clean":
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
                     clean_table(source, target, delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                                output_delimiter=DIALECTS[args.output_delimiter], trim=args.trim)
+                                output_delimiter=DIALECTS[args.output_delimiter], trim=args.trim, trim_header=args.trim_header)
                 return 0
             report = audit(source, DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                           max_errors=args.max_errors)
+                           max_errors=args.max_errors, trim_header=args.trim_header)
     except Problem as exc:
         print(exc, file=stderr)
         return 1

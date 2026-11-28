@@ -3,9 +3,9 @@ import csv
 from .reader import check_width, read_header, records
 
 
-def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=",", trim=False):
+def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=",", trim=False, trim_header=False):
     rows = records(source, delimiter, skip_blank=skip_blank)
-    header = read_header(rows)
+    header = read_header(rows, trim=trim_header)
     # CRLF also makes the standard writer quote cells containing a bare CR.
     writer = csv.writer(target, delimiter=output_delimiter, lineterminator="\r\n")
     writer.writerow(header)

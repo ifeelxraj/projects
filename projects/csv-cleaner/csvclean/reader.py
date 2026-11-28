@@ -36,21 +36,22 @@ def records(stream, delimiter=",", *, skip_blank=False):
         yield Record(first, reader.line_num, tuple(values))
 
 
-def read_header(rows):
+def read_header(rows, *, trim=False):
     try:
         row = next(rows)
     except StopIteration:
         raise Problem("missing header", 1, 1) from None
     if not row.fields:
         raise row.problem("empty header record")
+    names = tuple(name.strip() for name in row.fields) if trim else row.fields
     seen = set()
-    for index, name in enumerate(row.fields, 1):
+    for index, name in enumerate(names, 1):
         if not name.strip():
             raise row.problem(f"blank header at column {index}")
         if name in seen:
             raise row.problem(f"duplicate header at column {index}: {name!r}")
         seen.add(name)
-    return row.fields
+    return names
 
 
 def check_width(row, header):
@@ -66,13 +67,13 @@ class Report:
     stopped: bool = False
 
 
-def audit(stream, delimiter=",", *, skip_blank=False, max_errors=1):
+def audit(stream, delimiter=",", *, skip_blank=False, max_errors=1, trim_header=False):
     if max_errors < 1:
         raise ValueError("max_errors must be positive")
     result = Report()
     try:
         rows = records(stream, delimiter, skip_blank=skip_blank)
-        result.header = read_header(rows)
+        result.header = read_header(rows, trim=trim_header)
         for row in rows:
             result.examined += 1
             try:

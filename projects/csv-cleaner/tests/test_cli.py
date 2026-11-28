@@ -80,3 +80,10 @@ class CleanerTests(unittest.TestCase):
         sample = " label ,unit\n  two  words , kg \n"
         self.assertIn("  two  words , kg ", run("clean", text=sample)[1])
         self.assertEqual(run("clean", "--trim", text=sample)[1], " label ,unit\r\ntwo  words,kg\r\n")
+
+    def test_header_cleanup_checks_collisions_before_writing(self):
+        self.assertEqual(run("clean", "--trim-header", text=" a ,b \n x ,y")[1], "a,b\r\n x ,y\r\n")
+        for command in ("clean", "validate"):
+            rc, out, err = run(command, "--trim-header", text=" id,id \n1,2")
+            self.assertEqual((rc, out), (1, ""))
+            self.assertIn("duplicate header", err)
