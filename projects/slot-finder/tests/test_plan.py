@@ -30,3 +30,13 @@ class PlanTests(unittest.TestCase):
         packed = run("slots", *opts, "--non-overlap")[1].splitlines()
         self.assertEqual((stats["meeting_capacity"], len(packed)), (1, 1))
         self.assertEqual(run("summary", "--step", "5")[0], 2)
+
+    def test_explanation_distinguishes_closed_hours_and_padded_conflicts(self):
+        from test_cli import run
+        import json
+        data = "resource,start,end\nBench,10:00,10:20"
+        rc, out, _ = run("explain", "09:50-10:00", "--before", "5", "--calendar", "-", "--format", "json", text=data)
+        info = json.loads(out)
+        self.assertEqual((rc, info["inside_work"], info["available"]), (0, True, False))
+        self.assertEqual(info["conflicts"], [{"resource": "Bench", "blocked": "09:55-10:20", "overlap": "09:55-10:00"}])
+        self.assertIn("Not wholly inside", run("explain", "08:30-09:30")[1])

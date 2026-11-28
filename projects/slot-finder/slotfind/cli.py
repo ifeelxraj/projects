@@ -5,7 +5,7 @@ import sys
 
 from .calendar import CalendarError, SelectionError, bookings
 from .plan import prepare
-from .output import write_blocks, write_summary
+from .output import write_blocks, write_explanation, write_summary
 from .slots import candidates, non_overlapping
 from .time import duration_minutes, minute, span
 
@@ -38,8 +38,8 @@ def result_limit(text):
     return min(value, 1440)  # At most one distinct start per minute.
 
 
-def schedule_options(cmd):
-    cmd.add_argument("--format", choices=("text", "json", "csv"), default="text")
+def schedule_options(cmd, formats=("text", "json", "csv")):
+    cmd.add_argument("--format", choices=formats, default="text")
     cmd.add_argument("--ignore-tentative", action="store_true", help="let tentative bookings remain available")
     cmd.add_argument("--resource", action="append", default=[], metavar="NAME", help="only include selected resources")
     cmd.add_argument("--calendar", action="append", default=[], metavar="FILE", help="read a local booking CSV")
@@ -69,6 +69,9 @@ def parser():
     summary.add_argument("--duration", type=positive_minutes, help="also report packable meeting capacity")
     summary.add_argument("--step", type=positive_minutes, help="capacity grid spacing (default 15m)")
     summary.add_argument("--anchor", type=minute, help="capacity grid reference (default midnight)")
+    explain = commands.add_parser("explain", help="explain why a requested meeting does or does not fit")
+    schedule_options(explain, ("text", "json"))
+    explain.add_argument("request", type=interval_arg, metavar="START-END")
     return root
 
 
@@ -97,6 +100,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     except (OSError, UnicodeError) as exc:
         print(f"calendar input: {exc}", file=stderr)
         return 2
+    if args.command == "explain":
+        write_explanation(plan.explain(args.request), args.format, stdout)
+        return 0
     if args.command == "summary":
         stats = plan.summary()
         if args.duration is not None:

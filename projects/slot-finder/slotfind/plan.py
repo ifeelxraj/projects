@@ -22,6 +22,16 @@ class Plan:
     resources: tuple
     blockers: tuple
 
+    def explain(self, request):
+        inside = any(window.contains(request) for window in self.windows)
+        conflicts = []
+        for blocker in self.blockers:
+            overlap = request.intersect(blocker.interval)
+            if overlap:
+                conflicts.append({"resource": blocker.resource, "blocked": str(blocker.interval), "overlap": str(overlap)})
+        return {"request": str(request), "inside_work": inside, "available": inside and not conflicts,
+                "conflicts": conflicts}
+
     def capacity(self, duration, step, anchor=0):
         packed = non_overlapping(candidates(self.gaps, duration, step, anchor))
         return sum(1 for _ in packed)

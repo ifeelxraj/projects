@@ -31,3 +31,15 @@ def write_summary(summary, fmt, output):
     else:
         for name, value in summary.items():
             print(f"{name.replace('_', ' ')}: {value}", file=output)
+
+
+def write_explanation(info, fmt, output):
+    if fmt == "json":
+        print(json.dumps(info, ensure_ascii=False), file=output)
+        return
+    print(f"{info['request']}: {'available' if info['available'] else 'unavailable'}", file=output)
+    if not info["inside_work"]:
+        print("Not wholly inside working hours.", file=output)
+    for conflict in info["conflicts"]:
+        label = conflict["resource"] or "(manual block)"
+        print(f"{label}: {conflict['blocked']} overlaps {conflict['overlap']}", file=output)
