@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from test_cli import run
+from test_csv_cleaner_commands import run
 
 
 class OutputTests(unittest.TestCase):
@@ -38,7 +38,7 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(dest.read_bytes(), source.read_bytes())
 
     def test_competing_creation_cannot_be_overwritten_at_publication(self):
-        from csvclean.streams import output_stream
+        from csvclean.csv_cleaner_file_io import output_stream
         with TemporaryDirectory() as d:
             dest = Path(d) / "race.csv"
             with self.assertRaises(FileExistsError):
@@ -49,7 +49,7 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(list(Path(d).iterdir()), [dest])
 
     def test_writer_exception_does_not_leak_temporary_files(self):
-        from csvclean.streams import output_stream
+        from csvclean.csv_cleaner_file_io import output_stream
         with TemporaryDirectory() as d:
             with self.assertRaisesRegex(RuntimeError, "interrupt"):
                 with output_stream(Path(d) / "out.csv", None) as pending:

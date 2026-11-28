@@ -23,7 +23,7 @@ def main():
     # an export that failed validation. Publish a complete intermediate first.
     with TemporaryDirectory(prefix="plan-export-") as directory:
         calendar = str(Path(directory) / "calendar.csv")
-        clean = [sys.executable, str(PROJECTS / "csv-cleaner/csv-clean"), "clean", args.export,
+        clean = [sys.executable, str(PROJECTS / "csv-cleaner/csv-cleaner"), "clean", args.export,
                  "--delimiter", "tab", "--trim-header", "--trim", "--output", calendar]
         for source, target in columns.items():
             clean.extend(["--keep", source, "--rename", source, target])

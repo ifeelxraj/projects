@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from csvclean.reader import Record, records
+from csvclean.csv_cleaner_reader import Record, records
 
 
 def source(text, **kwargs):
@@ -22,7 +22,7 @@ class ReaderTests(unittest.TestCase):
 
 class HeaderTests(unittest.TestCase):
     def test_header_is_required_and_unambiguous(self):
-        from csvclean.reader import Problem, read_header
+        from csvclean.csv_cleaner_reader import Problem, read_header
         for text, message in [("", "missing header"), ("\n", "empty header"),
                               ("a, \n", "blank header"), ("a,a\n", "duplicate header")]:
             with self.subTest(text=text), self.assertRaisesRegex(Problem, message):
@@ -32,18 +32,18 @@ class HeaderTests(unittest.TestCase):
 
 class WidthTests(unittest.TestCase):
     def test_counts_data_records_not_physical_lines(self):
-        from csvclean.reader import validate
+        from csvclean.csv_cleaner_reader import validate
         self.assertEqual(validate(io.StringIO('a,b\n1,"x\ny"\n2,z')), (("a", "b"), 2))
 
     def test_width_diagnostic_spans_entire_logical_record(self):
-        from csvclean.reader import Problem, validate
+        from csvclean.csv_cleaner_reader import Problem, validate
         with self.assertRaisesRegex(Problem, "lines 2-3: expected 2 fields, found 1"):
             validate(io.StringIO('a,b\n"x\ny"\n'))
 
 
 class DialectBoundaryTests(unittest.TestCase):
     def test_truncated_multiline_field_reports_its_record(self):
-        from csvclean.reader import Problem
+        from csvclean.csv_cleaner_reader import Problem
         with self.assertRaises(Problem) as caught:
             list(source('a,b\r\n0,"open\r\nstill open'))
         self.assertEqual((caught.exception.first, caught.exception.last), (2, 3))
@@ -56,7 +56,7 @@ class DialectBoundaryTests(unittest.TestCase):
 class ReportLifetimeTests(unittest.TestCase):
     def test_retained_issues_do_not_hold_stream_frames(self):
         import weakref
-        from csvclean.reader import audit
+        from csvclean.csv_cleaner_reader import audit
         stream = io.StringIO('a,b\nbad\n"open')
         handle = weakref.ref(stream)
         report = audit(stream, max_errors=5)

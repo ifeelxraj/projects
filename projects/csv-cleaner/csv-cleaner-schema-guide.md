@@ -4,12 +4,12 @@ Create a starting point from the header, then add only the constraints the
 consumer actually needs:
 
 ```sh
-./csv-clean schema examples/stock.scsv --delimiter semicolon
-./csv-clean validate examples/stock.scsv --delimiter semicolon \
-  --schema examples/stock.schema.json --max-errors 8 --json
+./csv-cleaner schema examples/csv-cleaner-stock.scsv --delimiter semicolon
+./csv-cleaner validate examples/csv-cleaner-stock.scsv --delimiter semicolon \
+  --schema examples/csv-cleaner-stock.schema.json --max-errors 8 --json
 ```
 
-The [example contract](examples/stock.schema.json) declares the following keys.
+The [example contract](examples/csv-cleaner-stock.schema.json) declares the following keys.
 The JSON object must have integer `version: 1`. Unknown keys, duplicate keys and
 duplicate names in a list are errors, not warnings.
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from test_cli import run
+from test_csv_cleaner_commands import run
 
 
 class SchemaTests(unittest.TestCase):

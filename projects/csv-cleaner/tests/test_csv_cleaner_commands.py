@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from csvclean.cli import main
+from csvclean.csv_cleaner_commands import main
 
 
 def run(*args, text=""):

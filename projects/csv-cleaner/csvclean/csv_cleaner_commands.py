@@ -3,13 +3,13 @@ from dataclasses import asdict
 import json
 import sys
 
-from .profile import profile
-from .schema import rules_for
-from .transform import CellEdits
-from .layout import OptionError
-from .cleaner import clean_table
-from .streams import field_limit, input_stream, output_stream
-from .reader import Problem, Table, audit
+from .csv_cleaner_profile import profile
+from .csv_cleaner_schema import rules_for
+from .csv_cleaner_cell_edits import CellEdits
+from .csv_cleaner_columns import OptionError
+from .csv_cleaner_pipeline import clean_table
+from .csv_cleaner_file_io import field_limit, input_stream, output_stream
+from .csv_cleaner_reader import Problem, Table, audit
 
 
 DIALECTS = {"comma": ",", "tab": "\t", "semicolon": ";", "pipe": "|"}
@@ -41,7 +41,7 @@ def positive(text):
 
 
 def parser():
-    root = argparse.ArgumentParser(prog="csvclean", description="Check and clean delimited tables.")
+    root = argparse.ArgumentParser(prog="csv-cleaner", description="Check and clean delimited tables.")
     commands = root.add_subparsers(dest="command", required=True)
     check = commands.add_parser("validate", help="check the header and every row width")
     source_options(check)

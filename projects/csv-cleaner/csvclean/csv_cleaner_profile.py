@@ -1,7 +1,7 @@
 """Profile shape and completeness without collecting or exposing cell values."""
 
-from .layout import compile_layout
-from .reader import Table
+from .csv_cleaner_columns import compile_layout
+from .csv_cleaner_reader import Table
 
 
 def profile(source, *, only=(), **options):

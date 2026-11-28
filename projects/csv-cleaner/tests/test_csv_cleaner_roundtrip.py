@@ -3,8 +3,8 @@ import io
 import itertools
 import unittest
 
-from csvclean.cli import DIALECTS
-from test_cli import run
+from csvclean.csv_cleaner_commands import DIALECTS
+from test_csv_cleaner_commands import run
 
 
 class RoundTripTests(unittest.TestCase):

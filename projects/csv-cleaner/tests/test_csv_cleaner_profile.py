@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from test_cli import run
+from test_csv_cleaner_commands import run
 
 
 class ProfileTests(unittest.TestCase):

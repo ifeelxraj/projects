@@ -1,9 +1,9 @@
 import csv
 from dataclasses import dataclass
 
-from .transform import CellEdits
-from .layout import OptionError, compile_layout
-from .reader import Table
+from .csv_cleaner_cell_edits import CellEdits
+from .csv_cleaner_columns import OptionError, compile_layout
+from .csv_cleaner_reader import Table
 
 
 @dataclass

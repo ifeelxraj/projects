@@ -46,7 +46,7 @@ def output_stream(path, fallback, *, replace=False, protected=()):
 def field_limit(characters):
     """Temporarily override the csv module's process-wide character limit."""
     import csv
-    from .layout import OptionError
+    from .csv_cleaner_columns import OptionError
     if characters is None:
         yield
         return

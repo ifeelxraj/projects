@@ -22,7 +22,7 @@ class PipeTests(unittest.TestCase):
     def test_checkout_launcher_resolves_inputs_in_the_callers_directory(self):
         from pathlib import Path
         from tempfile import TemporaryDirectory
-        script = Path(__file__).resolve().parents[1] / "csv-clean"
+        script = Path(__file__).resolve().parents[1] / "csv-cleaner"
         with TemporaryDirectory() as d:
             (Path(d) / "local.csv").write_bytes(b"id\n01\n")
             result = subprocess.run([sys.executable, str(script), "validate", "local.csv"],
