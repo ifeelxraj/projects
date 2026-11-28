@@ -1,3 +1,4 @@
+import csv
 import json
 
 from .time import clock
@@ -11,6 +12,10 @@ def write_blocks(blocks, fmt, output):
     if fmt == "json":
         json.dump([describe(block) for block in blocks], output)
         output.write("\n")
+    elif fmt == "csv":
+        writer = csv.DictWriter(output, fieldnames=("start", "end", "minutes"), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(describe(block) for block in blocks)
     else:
         for block in blocks:
             print(block, file=output)

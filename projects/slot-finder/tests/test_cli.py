@@ -59,3 +59,8 @@ class SlotTests(unittest.TestCase):
         result = run("free", "--format", "json", "--window", "23:45-24:00")
         self.assertEqual(json.loads(result[1]), [{"start": "23:45", "end": "24:00", "minutes": 15}])
         self.assertEqual(json.loads(run("slots", "--duration", "24h", "--format", "json")[1]), [])
+
+    def test_csv_is_headered_and_can_be_piped_to_other_tools(self):
+        self.assertEqual(run("slots", "--duration", "1h", "--limit", "1", "--format", "csv")[1],
+                         "start,end,minutes\n09:00,10:00,60\n")
+        self.assertEqual(run("free", "--busy", "00:00-24:00", "--format", "csv")[1], "start,end,minutes\n")

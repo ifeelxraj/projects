@@ -37,7 +37,7 @@ def result_limit(text):
 
 
 def schedule_options(cmd):
-    cmd.add_argument("--format", choices=("text", "json"), default="text")
+    cmd.add_argument("--format", choices=("text", "json", "csv"), default="text")
     cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
     cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
     cmd.add_argument("--window", type=interval_arg, action="append", default=[], metavar="START-END")
