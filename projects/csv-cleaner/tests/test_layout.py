@@ -35,3 +35,8 @@ class LayoutTests(unittest.TestCase):
         rc, out, _ = run("clean", "--drop", "id", "--trim", "--skip-empty", "--fill-empty", "X",
                          text="id,a,b\n1, ,\n2,,value")
         self.assertEqual((rc, out), (0, "a,b\r\nX,value\r\n"))
+
+    def test_adjacent_collapse_compares_emitted_values_not_source_rows(self):
+        rc, out, _ = run("clean", "--keep", "v", "--trim", "--collapse-adjacent",
+                         text="id,v\n1, x\n2,x\n3,y\n4,x")
+        self.assertEqual((rc, out), (0, "v\r\nx\r\ny\r\nx\r\n"))
