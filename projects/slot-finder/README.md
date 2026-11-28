@@ -50,3 +50,5 @@ from the project root. Each command has its own `--help`.
   `--require-match` on `free`, `slots` or `rooms` returns status `3` instead.
   Status `1` means malformed calendar data; `2` means bad arguments, encoding,
   unknown resource or unreadable input. Diagnostics use stderr.
+
+See [Calendar contract and scheduling math](CALENDARS.md) for import details, boundary rules and ranking.
