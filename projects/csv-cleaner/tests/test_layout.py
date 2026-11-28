@@ -52,3 +52,10 @@ class LayoutTests(unittest.TestCase):
         cmd = ("clean", "--number-rows", "seq", "--skip-empty", "--collapse-adjacent")
         self.assertEqual(run(*cmd, text='v\nx\nx\n""\ny')[1], "seq,v\r\n1,x\r\n2,y\r\n")
         self.assertEqual(run(*cmd, text="seq\noriginal")[:2], (2, ""))
+
+    def test_success_summary_reconciles_rows_without_polluting_csv(self):
+        import json
+        rc, out, err = run("clean", "--summary", "--skip-empty", "--collapse-adjacent", text='a\nx\n""\nx\ny')
+        self.assertEqual((rc, out), (0, "a\r\nx\r\ny\r\n"))
+        self.assertEqual(json.loads(err), {"examined": 4, "written": 2, "empty_skipped": 1, "collapsed": 1})
+        self.assertNotIn('"written"', run("clean", "--summary", text="a\nx,y")[2])

@@ -1,8 +1,17 @@
 import csv
+from dataclasses import dataclass
 
 from .transform import CellEdits
 from .layout import OptionError, compile_layout
 from .reader import Table
+
+
+@dataclass
+class Counts:
+    examined: int = 0
+    written: int = 0
+    empty_skipped: int = 0
+    collapsed: int = 0
 
 
 def clean_table(source, target, *, output_delimiter=",", edits=CellEdits(),
@@ -17,13 +26,19 @@ def clean_table(source, target, *, output_delimiter=",", edits=CellEdits(),
             raise OptionError("row number needs a new nonblank output column name")
         labels = (number_rows, *labels)
     writer.writerow(labels)
-    written = 0
+    counts = Counts()
     previous = None
     for row in table:
+        counts.examined += 1
         values = edits.apply(layout.select(row.fields))
-        if values is None or (collapse and values == previous):
+        if values is None:
+            counts.empty_skipped += 1
             continue
-        written += 1
-        writer.writerow((written, *values) if number_rows is not None else values)
+        if collapse and values == previous:
+            counts.collapsed += 1
+            continue
+        counts.written += 1
+        writer.writerow((counts.written, *values) if number_rows is not None else values)
         if collapse:
             previous = values
+    return counts
