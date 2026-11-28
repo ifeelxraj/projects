@@ -51,3 +51,18 @@ class DialectBoundaryTests(unittest.TestCase):
     def test_blank_record_differs_from_an_empty_quoted_value(self):
         rows = list(source('\n""\n"a""b"'))
         self.assertEqual([r.fields for r in rows], [(), ("",), ('a"b',)])
+
+
+class ReportLifetimeTests(unittest.TestCase):
+    def test_retained_issues_do_not_hold_stream_frames(self):
+        import weakref
+        from csvclean.reader import audit
+        stream = io.StringIO('a,b\nbad\n"open')
+        handle = weakref.ref(stream)
+        report = audit(stream, max_errors=5)
+        self.assertEqual(len(report.problems), 2)
+        self.assertTrue(all(issue.__traceback__ is None for issue in report.problems))
+        del stream
+        import gc
+        gc.collect()
+        self.assertIsNone(handle())

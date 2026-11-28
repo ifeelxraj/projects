@@ -102,6 +102,11 @@ class Report:
     problems: list = field(default_factory=list)
     stopped: bool = False
 
+    def add(self, issue):
+        # Raised exceptions own tracebacks, which can retain raw cells, streams
+        # and the audit frame. A saved report needs only the diagnostic itself.
+        self.problems.append(Problem(issue.message, issue.first, issue.last))
+
 
 def audit(stream, delimiter=",", *, max_errors=1, **options):
     if max_errors < 1:
@@ -115,12 +120,12 @@ def audit(stream, delimiter=",", *, max_errors=1, **options):
             try:
                 table.check(row)
             except Problem as exc:
-                result.problems.append(exc)
+                result.add(exc)
                 if len(result.problems) >= max_errors:
                     result.stopped = True
                     break
     except Problem as exc:  # Bad quoting or an unusable header cannot be recovered.
-        result.problems.append(exc)
+        result.add(exc)
         result.stopped = True
     return result
 
