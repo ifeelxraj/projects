@@ -38,7 +38,8 @@ jobs:
         run: make -j2 test-ubsan
 
   python-projects:
-    runs-on: ubuntu-latest
+    # setup-python publishes the 3.9 x64 runtime for 24.04, not 26.04.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python: ['3.9', '3.13']
