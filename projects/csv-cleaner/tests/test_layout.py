@@ -30,3 +30,8 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(run("clean", "--fill-empty", "NA", text=sample)[1], "a,b\r\n ,0\r\nNA,word\r\n")
         self.assertEqual(run("clean", "--trim", "--fill-empty", "NA", text=sample)[1],
                          "a,b\r\nNA,0\r\nNA,word\r\n")
+
+    def test_skip_empty_applies_to_output_columns_before_filling(self):
+        rc, out, _ = run("clean", "--drop", "id", "--trim", "--skip-empty", "--fill-empty", "X",
+                         text="id,a,b\n1, ,\n2,,value")
+        self.assertEqual((rc, out), (0, "a,b\r\nX,value\r\n"))

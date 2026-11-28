@@ -14,4 +14,6 @@ def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delim
     writer.writerow(layout.names)
     for row in rows:
         check_width(row, header)
-        writer.writerow(edits.apply(layout.select(row.fields)))
+        values = edits.apply(layout.select(row.fields))
+        if values is not None:
+            writer.writerow(values)
