@@ -2,6 +2,7 @@ import argparse
 from itertools import islice
 import sys
 
+from .calendar import CalendarError, bookings
 from .availability import available_across
 from .output import write_blocks
 from .slots import candidates, non_overlapping
@@ -38,6 +39,7 @@ def result_limit(text):
 
 def schedule_options(cmd):
     cmd.add_argument("--format", choices=("text", "json", "csv"), default="text")
+    cmd.add_argument("--calendar", action="append", default=[], metavar="FILE", help="read a local booking CSV")
     cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
     cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
     cmd.add_argument("--window", type=interval_arg, action="append", default=[], metavar="START-END")
@@ -65,7 +67,19 @@ def parser():
 def main(argv=None, *, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
-    busy = (period.padded(args.before, args.after) for period in args.busy)
+    stderr = sys.stderr if stderr is None else stderr
+    periods = list(args.busy)
+    try:
+        for path in args.calendar:
+            with open(path, encoding="utf-8-sig", newline="") as stream:
+                periods.extend(b.interval for b in bookings(stream, path))
+    except CalendarError as exc:
+        print(exc, file=stderr)
+        return 1
+    except (OSError, UnicodeError) as exc:
+        print(f"calendar input: {exc}", file=stderr)
+        return 2
+    busy = (period.padded(args.before, args.after) for period in periods)
     gaps = available_across(args.window or [span("09:00-17:00")], busy)
     if args.command == "free":
         blocks = (g for g in gaps if g.minutes >= args.min)
