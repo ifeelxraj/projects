@@ -1,6 +1,6 @@
 import sys
 
-from .cli import main
+from .slot_finder_commands import main
 
 
 def entrypoint():

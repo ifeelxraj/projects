@@ -1,4 +1,4 @@
-from .time import Span
+from .slot_finder_time_ranges import Span
 
 
 def union(intervals):

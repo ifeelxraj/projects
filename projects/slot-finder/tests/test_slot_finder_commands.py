@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from slotfind.cli import main
+from slotfind.slot_finder_commands import main
 
 
 def run(*args, text=""):

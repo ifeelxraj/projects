@@ -27,7 +27,7 @@ class ProcessTests(unittest.TestCase):
     def test_standalone_launcher_reads_paths_relative_to_caller(self):
         from pathlib import Path
         from tempfile import TemporaryDirectory
-        script = Path(__file__).resolve().parents[1] / "find-slots"
+        script = Path(__file__).resolve().parents[1] / "slot-finder"
         with TemporaryDirectory() as d:
             (Path(d) / "bookings.csv").write_text("resource,start,end\nA,09:00,09:30", encoding="utf-8")
             result = subprocess.run([sys.executable, str(script), "free", "--calendar", "bookings.csv"],

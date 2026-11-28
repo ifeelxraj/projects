@@ -1,7 +1,7 @@
 import unittest
 
-from slotfind.slots import candidates
-from slotfind.time import Span
+from slotfind.slot_finder_meeting_slots import candidates
+from slotfind.slot_finder_time_ranges import Span
 
 
 class CandidateTests(unittest.TestCase):

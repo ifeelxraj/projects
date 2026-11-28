@@ -1,8 +1,8 @@
 import unittest
 
-from slotfind.calendar import Booking
-from slotfind.plan import prepare
-from slotfind.time import Span
+from slotfind.slot_finder_calendar_reader import Booking
+from slotfind.slot_finder_schedule import prepare
+from slotfind.slot_finder_time_ranges import Span
 
 
 class PlanTests(unittest.TestCase):
@@ -15,7 +15,7 @@ class PlanTests(unittest.TestCase):
 
     def test_summary_counts_overlapping_bookings_and_work_only_once(self):
         import json
-        from test_cli import run
+        from test_slot_finder_commands import run
         rc, out, _ = run("summary", "--window", "09:00-10:00", "--window", "09:30-11:00",
                          "--busy", "08:00-09:30", "--busy", "09:15-09:45", "--format", "json")
         self.assertEqual(rc, 0)
@@ -24,7 +24,7 @@ class PlanTests(unittest.TestCase):
 
     def test_capacity_matches_packed_slots_rather_than_dividing_free_minutes(self):
         import json
-        from test_cli import run
+        from test_slot_finder_commands import run
         opts = ("--window", "09:01-10:01", "--duration", "20", "--step", "15")
         stats = json.loads(run("summary", *opts, "--format", "json")[1])
         packed = run("slots", *opts, "--non-overlap")[1].splitlines()
@@ -32,7 +32,7 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(run("summary", "--step", "5")[0], 2)
 
     def test_explanation_distinguishes_closed_hours_and_padded_conflicts(self):
-        from test_cli import run
+        from test_slot_finder_commands import run
         import json
         data = "resource,start,end\nBench,10:00,10:20"
         rc, out, _ = run("explain", "09:50-10:00", "--before", "5", "--calendar", "-", "--format", "json", text=data)
@@ -42,7 +42,7 @@ class PlanTests(unittest.TestCase):
         self.assertIn("Not wholly inside", run("explain", "08:30-09:30")[1])
 
     def test_rooms_require_the_same_resource_for_the_entire_request(self):
-        from test_cli import run
+        from test_slot_finder_commands import run
         data = "resource,start,end,status\nA,09:00,09:15,busy\nB,09:15,09:30,busy\nC,09:00,09:30,free"
         cmd = ("rooms", "09:00-09:30", "--calendar", "-")
         self.assertEqual(run(*cmd, text=data)[1], "C\n")

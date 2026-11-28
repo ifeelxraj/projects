@@ -31,7 +31,7 @@ cleaning order and atomic output files.
 ## Find an available meeting time
 
 ```sh
-projects/slot-finder/find-slots free --window 09:00-12:00 --busy 10:00-10:30
+projects/slot-finder/slot-finder free --window 09:00-12:00 --busy 10:00-10:30
 python3 examples/availability/plan_export.py
 ```
 

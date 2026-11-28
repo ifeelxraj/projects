@@ -1,7 +1,7 @@
 import unittest
 
-from slotfind.availability import union
-from slotfind.time import Span
+from slotfind.slot_finder_free_time import union
+from slotfind.slot_finder_time_ranges import Span
 
 
 class UnionTests(unittest.TestCase):
@@ -15,7 +15,7 @@ class UnionTests(unittest.TestCase):
 
 class GapTests(unittest.TestCase):
     def test_clips_outside_bookings_and_keeps_both_edge_gaps(self):
-        from slotfind.availability import available
+        from slotfind.slot_finder_free_time import available
         window = Span(20, 60)
         self.assertEqual(available(window, [Span(5, 10), Span(30, 40), Span(70, 80)]),
                          [Span(20, 30), Span(40, 60)])
@@ -24,7 +24,7 @@ class GapTests(unittest.TestCase):
 
     def test_gap_algorithm_agrees_with_a_minute_occupancy_oracle(self):
         import random
-        from slotfind.availability import available
+        from slotfind.slot_finder_free_time import available
         rng = random.Random(137)
         for _ in range(300):
             window = Span(*sorted(rng.sample(range(61), 2)))
@@ -38,7 +38,7 @@ class GapTests(unittest.TestCase):
 
     def test_split_shifts_with_overlapping_windows_match_set_subtraction(self):
         import random
-        from slotfind.availability import available_across
+        from slotfind.slot_finder_free_time import available_across
         rng = random.Random(31)
         def sample():
             return [Span(*sorted(rng.sample(range(40), 2))) for _ in range(rng.randrange(7))]

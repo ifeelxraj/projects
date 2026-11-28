@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Optional
 
-from .availability import available_across, union
-from .calendar import select_bookings
-from .slots import candidates, non_overlapping
-from .time import Span
+from .slot_finder_free_time import available_across, union
+from .slot_finder_calendar_reader import select_bookings
+from .slot_finder_meeting_slots import candidates, non_overlapping
+from .slot_finder_time_ranges import Span
 
 
 @dataclass(frozen=True)

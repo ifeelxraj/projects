@@ -1,6 +1,6 @@
 """Generate candidate meetings from sorted disjoint free blocks."""
 
-from .time import Span
+from .slot_finder_time_ranges import Span
 
 
 def candidates(gaps, duration, step, anchor=0):

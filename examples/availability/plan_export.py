@@ -32,7 +32,7 @@ def main():
         checked = subprocess.run(clean, check=False)
         if checked.returncode:
             return checked.returncode
-        return subprocess.run([sys.executable, str(PROJECTS / "slot-finder/find-slots"), "slots",
+        return subprocess.run([sys.executable, str(PROJECTS / "slot-finder/slot-finder"), "slots",
                                "--calendar", calendar, "--window", args.window, "--duration", args.duration,
                                "--format", "json"], check=False).returncode
 

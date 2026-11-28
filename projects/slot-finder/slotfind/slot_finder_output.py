@@ -1,7 +1,7 @@
 import csv
 import json
 
-from .time import clock
+from .slot_finder_time_ranges import clock
 
 
 def describe(block):

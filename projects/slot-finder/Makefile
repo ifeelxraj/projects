@@ -6,4 +6,4 @@ test:
 	$(PYTHON) -m unittest discover -s tests
 
 demo:
-	sh examples/shared-morning.sh
+	sh examples/slot-finder-morning-demo.sh

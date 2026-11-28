@@ -3,7 +3,7 @@
 import csv
 from dataclasses import dataclass
 
-from .time import Span, minute
+from .slot_finder_time_ranges import Span, minute
 
 
 class CalendarError(ValueError):

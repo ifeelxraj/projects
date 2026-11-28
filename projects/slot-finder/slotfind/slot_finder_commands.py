@@ -3,11 +3,11 @@ from contextlib import nullcontext
 from itertools import islice
 import sys
 
-from .calendar import CalendarError, SelectionError, bookings
-from .plan import prepare
-from .output import write_blocks, write_explanation, write_names, write_summary
-from .slots import candidates, non_overlapping
-from .time import duration_minutes, minute, span
+from .slot_finder_calendar_reader import CalendarError, SelectionError, bookings
+from .slot_finder_schedule import prepare
+from .slot_finder_output import write_blocks, write_explanation, write_names, write_summary
+from .slot_finder_meeting_slots import candidates, non_overlapping
+from .slot_finder_time_ranges import duration_minutes, minute, span
 
 
 def interval_arg(text):
@@ -50,7 +50,7 @@ def schedule_options(cmd, formats=("text", "json", "csv")):
 
 
 def parser():
-    root = argparse.ArgumentParser(prog="slotfind", description="Plan one local day in whole minutes.")
+    root = argparse.ArgumentParser(prog="slot-finder", description="Plan one local day in whole minutes.")
     commands = root.add_subparsers(dest="command", required=True)
     free = commands.add_parser("free", help="list shared free blocks")
     schedule_options(free)
