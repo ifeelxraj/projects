@@ -10,15 +10,21 @@ def describe(block):
 
 def write_blocks(blocks, fmt, output):
     if fmt == "json":
-        json.dump([describe(block) for block in blocks], output)
-        output.write("\n")
-    elif fmt == "csv":
+        rows = [describe(block) for block in blocks]
+        print(json.dumps(rows), file=output)
+        return len(rows)
+    writer = None
+    if fmt == "csv":
         writer = csv.DictWriter(output, fieldnames=("start", "end", "minutes"), lineterminator="\n")
         writer.writeheader()
-        writer.writerows(describe(block) for block in blocks)
-    else:
-        for block in blocks:
+    count = 0
+    for block in blocks:
+        if writer is None:
             print(block, file=output)
+        else:
+            writer.writerow(describe(block))
+        count += 1
+    return count
 
 
 def write_summary(summary, fmt, output):

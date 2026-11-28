@@ -64,3 +64,10 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(run("slots", "--duration", "1h", "--limit", "1", "--format", "csv")[1],
                          "start,end,minutes\n09:00,10:00,60\n")
         self.assertEqual(run("free", "--busy", "00:00-24:00", "--format", "csv")[1], "start,end,minutes\n")
+
+    def test_require_match_signals_empty_results_without_changing_output_schema(self):
+        for cmd in [("free",), ("slots", "--duration", "15"), ("rooms", "10:00-10:20")]:
+            args = (*cmd, "--busy", "00:00-24:00", "--format", "json")
+            self.assertEqual(run(*args), (0, "[]\n", ""))
+            self.assertEqual(run(*args, "--require-match"), (3, "[]\n", ""))
+        self.assertEqual(run("free", "--require-match")[0], 0)

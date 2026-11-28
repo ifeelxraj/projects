@@ -75,6 +75,8 @@ def parser():
     rooms = commands.add_parser("rooms", help="list individual resources available for the whole request")
     schedule_options(rooms)
     rooms.add_argument("request", type=interval_arg, metavar="START-END")
+    for cmd in (free, slots, rooms):
+        cmd.add_argument("--require-match", action="store_true", help="exit 3 when no results match")
     return root
 
 
@@ -104,8 +106,9 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
         print(f"calendar input: {exc}", file=stderr)
         return 2
     if args.command == "rooms":
-        write_names(plan.available_resources(args.request), args.format, stdout)
-        return 0
+        names = plan.available_resources(args.request)
+        write_names(names, args.format, stdout)
+        return 3 if args.require_match and not names else 0
     if args.command == "explain":
         write_explanation(plan.explain(args.request), args.format, stdout)
         return 0
@@ -129,5 +132,5 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
             blocks = non_overlapping(blocks)
         if args.limit is not None:
             blocks = islice(blocks, args.limit)
-    write_blocks(blocks, args.format, stdout)
-    return 0
+    count = write_blocks(blocks, args.format, stdout)
+    return 3 if args.require_match and not count else 0
