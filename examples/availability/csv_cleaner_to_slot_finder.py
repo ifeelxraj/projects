@@ -14,7 +14,7 @@ PROJECTS = HERE.parents[1] / "projects"
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("export", nargs="?", default=str(HERE / "vendor.tsv"))
+    parser.add_argument("export", nargs="?", default=str(HERE / "csv-cleaner-to-slot-finder-bookings.tsv"))
     parser.add_argument("--window", default="09:00-12:00")
     parser.add_argument("--duration", default="30m")
     args = parser.parse_args()

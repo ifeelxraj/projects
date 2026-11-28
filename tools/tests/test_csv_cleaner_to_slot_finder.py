@@ -5,7 +5,7 @@ import sys
 import unittest
 
 
-RECIPE = Path(__file__).resolve().parents[2] / "examples/availability/plan_export.py"
+RECIPE = Path(__file__).resolve().parents[2] / "examples/availability/csv_cleaner_to_slot_finder.py"
 
 
 class ImportRecipeTests(unittest.TestCase):

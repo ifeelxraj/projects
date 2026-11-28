@@ -1,6 +1,6 @@
 import unittest
 
-from tools.check_index import index_errors
+from tools.projects_catalog_check import index_errors
 
 
 class IndexTests(unittest.TestCase):

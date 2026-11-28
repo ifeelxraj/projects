@@ -2,7 +2,7 @@ from datetime import date
 from pathlib import Path
 import unittest
 
-from tools.run_brief import relevant_handoffs
+from tools.projects_daily_brief import relevant_handoffs
 
 
 class RunBriefTests(unittest.TestCase):

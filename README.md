@@ -32,7 +32,7 @@ cleaning order and atomic output files.
 
 ```sh
 projects/slot-finder/slot-finder free --window 09:00-12:00 --busy 10:00-10:30
-python3 examples/availability/plan_export.py
+python3 examples/availability/csv_cleaner_to_slot_finder.py
 ```
 
 The [slot finder](projects/slot-finder/README.md) can find shared blocks, rank
@@ -42,7 +42,7 @@ Run `make demo` at the root to replay all examples.
 
 ## Continue development
 
-Run `python3 tools/run_brief.py` for the current index, recent history and daily
+Run `python3 tools/projects_daily_brief.py` for the current index, recent history and daily
 handoffs. The [contributor guide](CONTRIBUTING.md) explains the check, commit,
 stop and logging process. Dated run notes live in `logs/`.
 
