@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "columns": ["item", "quantity", "day", "note"],
+  "required": ["item", "quantity", "day"],
+  "integer": ["quantity"],
+  "date": ["day"]
+}

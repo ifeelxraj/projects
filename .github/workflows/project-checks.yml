@@ -36,3 +36,19 @@ jobs:
       - name: Check for undefined behavior
         if: matrix.compiler == 'g++'
         run: make -j2 test-ubsan
+
+  python-projects:
+    # setup-python publishes the 3.9 x64 runtime for 24.04, not 26.04.
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ['3.9', '3.13']
+        project: [csv-cleaner, slot-finder]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: make -C projects/${{ matrix.project }} test demo

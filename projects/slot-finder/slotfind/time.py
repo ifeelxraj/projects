@@ -1,0 +1,78 @@
+"""Minute precision in one local day. No dates, time zones or implicit rollover."""
+
+from dataclasses import dataclass
+import re
+
+DAY = 24 * 60
+
+
+def minute(text):
+    if not re.fullmatch(r"[0-9]{2}:[0-9]{2}", text):
+        raise ValueError(f"expected HH:MM, got {text!r}")
+    hour, part = map(int, text.split(":"))
+    if hour == 24 and part == 0:
+        return DAY
+    if hour >= 24 or part >= 60:
+        raise ValueError(f"time outside day: {text!r}")
+    return hour * 60 + part
+
+
+def clock(value):
+    if type(value) is not int or not 0 <= value <= DAY:
+        raise ValueError("minutes outside day")
+    return f"{value // 60:02d}:{value % 60:02d}"
+
+
+@dataclass(frozen=True, order=True)
+class Span:
+    start: int
+    end: int
+
+    def __post_init__(self):
+        if type(self.start) is not int or type(self.end) is not int:
+            raise ValueError("interval endpoints must be whole minutes")
+        if not 0 <= self.start < self.end <= DAY:
+            raise ValueError("interval must start before its end within one day")
+
+    @property
+    def minutes(self):
+        return self.end - self.start
+
+    def padded(self, before=0, after=0):
+        if type(before) is not int or type(after) is not int:
+            raise ValueError("padding must be in whole minutes")
+        if min(before, after) < 0:
+            raise ValueError("padding cannot be negative")
+        return Span(max(0, self.start - before), min(DAY, self.end + after))
+
+    def intersect(self, other):
+        lo, hi = max(self.start, other.start), min(self.end, other.end)
+        return Span(lo, hi) if lo < hi else None
+
+    def contains(self, other):
+        return self.start <= other.start and other.end <= self.end
+
+    def __str__(self):
+        return f"{clock(self.start)}-{clock(self.end)}"
+
+
+def span(text):
+    pieces = text.split("-")
+    if len(pieces) != 2:
+        raise ValueError(f"expected HH:MM-HH:MM, got {text!r}")
+    return Span(*(minute(part) for part in pieces))
+
+
+def duration_minutes(text):
+    """Accept 90, 90m, 1h or 1h30m. A duration cannot exceed one day."""
+    plain = re.fullmatch(r"([0-9]{1,4})m?", text)
+    hours = re.fullmatch(r"([0-9]{1,2})h(?:([0-5]?[0-9])m)?", text)
+    if plain:
+        value = int(plain[1])
+    elif hours:
+        value = 60 * int(hours[1]) + int(hours[2] or 0)
+    else:
+        raise ValueError("expected minutes or a duration such as 1h30m")
+    if value > DAY:
+        raise ValueError("duration exceeds one day")
+    return value
