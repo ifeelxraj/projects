@@ -21,6 +21,7 @@ def source_options(command):
 
 
 def rule_options(command):
+    command.add_argument("--date", metavar="NAME", action="append", default=[], help="check ISO calendar dates")
     command.add_argument("--integer", metavar="NAME", action="append", default=[], help="check signed ASCII integer text")
     command.add_argument("--require", metavar="NAME", action="append", default=[], help="require a nonblank input value")
 
@@ -63,7 +64,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
     options = dict(delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                   trim_header=args.trim_header, rules=Rules(required=tuple(args.require), integer=tuple(args.integer)))
+                   trim_header=args.trim_header, rules=Rules(required=tuple(args.require), integer=tuple(args.integer), date=tuple(args.date)))
     try:
         with input_stream(args.input, stdin) as source:
             if args.command == "clean":

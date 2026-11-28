@@ -1,21 +1,33 @@
 """Bind column names to checks once, before streaming data rows."""
 
 from dataclasses import dataclass
+from datetime import date
 import re
 
 from .layout import OptionError
+
+
+def iso_date(value):
+    if not value:
+        return True
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
 
 
 @dataclass(frozen=True)
 class Rules:
     required: tuple = ()
     integer: tuple = ()
+    date: tuple = ()
 
     def bind(self, header):
         positions = {name: i for i, name in enumerate(header)}
         checks = []
         groups = [
             (self.required, "must not be blank", lambda v: bool(v.strip())),
+            (self.date, "must be a YYYY-MM-DD date", iso_date),
             (self.integer, "must be an integer", lambda v: not v or re.fullmatch(r"[+-]?[0-9]+", v)),
         ]
         for names, message, accepts in groups:

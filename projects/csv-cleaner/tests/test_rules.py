@@ -17,3 +17,8 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(run("validate", "--integer", "n", text=sample)[0], 0)
         for value in ("3.0", "2e1", "１２", " 3"):
             self.assertEqual(run("validate", "--integer", "n", text=f"n\n{value}\n")[0], 1)
+
+    def test_calendar_dates_must_exist_and_have_canonical_spelling(self):
+        for value, code in [("2024-02-29", 0), ("2023-02-29", 1), ("20240102", 1), ("2024-W01-1", 1)]:
+            with self.subTest(value=value):
+                self.assertEqual(run("validate", "--date", "d", text=f"d\n{value}\n")[0], code)
