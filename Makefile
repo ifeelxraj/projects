@@ -15,3 +15,8 @@ demo:
 	$(MAKE) -C projects/csv-cleaner demo
 	$(MAKE) -C projects/slot-finder demo
 	python3 examples/availability/plan_export.py
+
+.PHONY: verify
+verify: test
+	$(MAKE) -C projects/atm-simulator test-ubsan
+	$(MAKE) demo

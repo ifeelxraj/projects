@@ -25,10 +25,11 @@ change, understand it before editing; never discard someone else's work.
   Make each small change runnable, review its diff, and use a descriptive
   `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, or `chore:` subject.
 - Before each commit, run the affected project's checks and exercise the
-  behavior. For the ATM simulator use `make -C projects/atm-simulator test`;
-  for repository tooling use `python3 -m unittest discover -s tools/tests`.
-  Stage specific paths and inspect `git diff --cached --check` and the staged
-  diff. Keep credentials, personal data, caches and binaries out of Git.
+  behavior. Each project supports `make -C projects/<name> test`. From the root,
+  `make test` runs every project, the index checker, contributor-tool tests, and
+  the export-to-slots integration tests. Stage specific paths and inspect
+  `git diff --cached --check` and the staged diff. Keep credentials, personal
+  data, caches and binaries out of Git.
 - Use actual work times. Do not backdate, rewrite, force-push, or generate a
   batch of cosmetic changes to meet the target.
 
@@ -39,7 +40,8 @@ reason, what was verified, the actual count (even zero) and a recovery step to
 `logs/YYYY-MM-DD.md` using the UTC date. Leave the work intact; don't work around
 the failure or create filler commits.
 
-At a successful handoff, rerun verification, update project status, and append
+At a successful handoff, run `make verify` (tests, UBSan and executable demos),
+update project status, and append
 a run section to the same daily file. Record what shipped, tests, and a specific
 next step. Use `git rev-list --count "$start..HEAD"` rather than counting other
 people's commits from the calendar. State whether the handoff commit is included
