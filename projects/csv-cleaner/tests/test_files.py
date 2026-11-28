@@ -56,3 +56,13 @@ class OutputTests(unittest.TestCase):
                     pending.write("partial")
                     raise RuntimeError("interrupt")
             self.assertEqual(list(Path(d).iterdir()), [])
+
+    def test_replace_cannot_destroy_the_rule_file(self):
+        with TemporaryDirectory() as d:
+            config = Path(d) / "rules.json"
+            data = b'{"version":1,"columns":["a"]}'
+            config.write_bytes(data)
+            rc, _, err = run("clean", "--schema", str(config), "--replace", "-o", str(config), text="a\n1")
+            self.assertEqual(rc, 2)
+            self.assertIn("same file", err)
+            self.assertEqual(config.read_bytes(), data)

@@ -13,7 +13,7 @@ def input_stream(path, fallback):
 
 
 @contextmanager
-def output_stream(path, fallback, *, replace=False, input_path="-"):
+def output_stream(path, fallback, *, replace=False, protected=()):
     if path == "-":
         if replace:
             raise OSError("--replace needs a named output")
@@ -22,8 +22,10 @@ def output_stream(path, fallback, *, replace=False, input_path="-"):
     dest = Path(path)
     if replace and dest.is_symlink():
         raise OSError("refusing to replace a symbolic link")
-    if replace and input_path != "-" and dest.exists() and os.path.samefile(input_path, dest):
-        raise OSError("input and output refer to the same file")
+    if replace and dest.exists():
+        for source in protected:
+            if source and source != "-" and os.path.samefile(source, dest):
+                raise OSError("an input and the output refer to the same file")
     if not replace and os.path.lexists(dest):
         raise FileExistsError(f"output already exists: {dest}")
     temp = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="",

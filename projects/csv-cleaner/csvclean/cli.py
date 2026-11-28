@@ -94,7 +94,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
                 stdout.write("\n")
                 return 0
             if args.command == "clean":
-                with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
+                with output_stream(args.output, stdout, replace=args.replace, protected=(args.input, args.schema)) as target:
                     counts = clean_table(source, target, **options, output_delimiter=DIALECTS[args.output_delimiter],
                                 edits=CellEdits(args.trim, args.fill_empty, args.skip_empty),
                                 keep=args.keep, drop=args.drop, rename=args.rename, collapse=args.collapse_adjacent,
