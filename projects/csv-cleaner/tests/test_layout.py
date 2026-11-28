@@ -40,3 +40,10 @@ class LayoutTests(unittest.TestCase):
         rc, out, _ = run("clean", "--keep", "v", "--trim", "--collapse-adjacent",
                          text="id,v\n1, x\n2,x\n3,y\n4,x")
         self.assertEqual((rc, out), (0, "v\r\nx\r\ny\r\nx\r\n"))
+
+    def test_combined_pipeline_is_idempotent_on_canonical_output(self):
+        args = ("clean", "--trim", "--trim-header", "--skip-empty", "--fill-empty", "unknown",
+                "--collapse-adjacent")
+        first = run(*args, text=' id ,note\n , \n01," a,b "\n01,"a,b"\n02,')
+        self.assertEqual(first, (0, 'id,note\r\n01,"a,b"\r\n02,unknown\r\n', ""))
+        self.assertEqual(run(*args, text=first[1]), first)
