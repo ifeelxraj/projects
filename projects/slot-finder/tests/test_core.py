@@ -33,3 +33,13 @@ class SpanTests(unittest.TestCase):
         self.assertEqual(work.intersect(Span(30, 70)), Span(60, 70))
         self.assertTrue(work.contains(Span(60, 120)))
         self.assertFalse(work.contains(Span(90, 121)))
+
+
+class DurationTests(unittest.TestCase):
+    def test_duration_units_and_day_cap(self):
+        from slotfind.time import duration_minutes
+        for text, value in [("90", 90), ("90m", 90), ("1h30m", 90), ("24h", 1440), ("0m", 0)]:
+            self.assertEqual(duration_minutes(text), value)
+        for text in ("24h1m", "1h60m", "1.5h", "1:30", "-5", "2000m"):
+            with self.assertRaises(ValueError):
+                duration_minutes(text)

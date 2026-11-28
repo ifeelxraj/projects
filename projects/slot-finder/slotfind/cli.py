@@ -4,7 +4,7 @@ import sys
 
 from .availability import available_across
 from .slots import candidates, non_overlapping
-from .time import minute, span
+from .time import duration_minutes, minute, span
 
 
 def interval_arg(text):
@@ -15,17 +15,17 @@ def interval_arg(text):
 
 
 def positive_minutes(text):
-    value = int(text)
+    value = nonnegative_minutes(text)
     if not 1 <= value <= 1440:
         raise argparse.ArgumentTypeError("expected 1 to 1440 minutes")
     return value
 
 
 def nonnegative_minutes(text):
-    value = int(text)
-    if not 0 <= value <= 1440:
-        raise argparse.ArgumentTypeError("expected 0 to 1440 minutes")
-    return value
+    try:
+        return duration_minutes(text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
 
 
 def result_limit(text):

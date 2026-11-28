@@ -57,3 +57,18 @@ def span(text):
     if len(pieces) != 2:
         raise ValueError(f"expected HH:MM-HH:MM, got {text!r}")
     return Span(*(minute(part) for part in pieces))
+
+
+def duration_minutes(text):
+    """Accept 90, 90m, 1h or 1h30m. A duration cannot exceed one day."""
+    plain = re.fullmatch(r"([0-9]{1,4})m?", text)
+    hours = re.fullmatch(r"([0-9]{1,2})h(?:([0-5]?[0-9])m)?", text)
+    if plain:
+        value = int(plain[1])
+    elif hours:
+        value = 60 * int(hours[1]) + int(hours[2] or 0)
+    else:
+        raise ValueError("expected minutes or a duration such as 1h30m")
+    if value > DAY:
+        raise ValueError("duration exceeds one day")
+    return value
