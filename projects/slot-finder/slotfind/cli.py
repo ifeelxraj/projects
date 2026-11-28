@@ -3,7 +3,7 @@ from contextlib import nullcontext
 from itertools import islice
 import sys
 
-from .calendar import CalendarError, bookings
+from .calendar import CalendarError, SelectionError, bookings, select_bookings
 from .availability import available_across
 from .output import write_blocks
 from .slots import candidates, non_overlapping
@@ -40,6 +40,7 @@ def result_limit(text):
 
 def schedule_options(cmd):
     cmd.add_argument("--format", choices=("text", "json", "csv"), default="text")
+    cmd.add_argument("--resource", action="append", default=[], metavar="NAME", help="only include selected resources")
     cmd.add_argument("--calendar", action="append", default=[], metavar="FILE", help="read a local booking CSV")
     cmd.add_argument("--before", type=nonnegative_minutes, default=0, help="setup minutes before each booking")
     cmd.add_argument("--after", type=nonnegative_minutes, default=0, help="cleanup minutes after each booking")
@@ -73,12 +74,17 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     if args.calendar.count("-") > 1:
         print("stdin can only be used once", file=stderr)
         return 2
+    entries = []
     periods = list(args.busy)
     try:
         for path in args.calendar:
             handle = nullcontext(stdin) if path == "-" else open(path, encoding="utf-8-sig", newline="")
             with handle as stream:
-                periods.extend(b.interval for b in bookings(stream, path))
+                entries.extend(bookings(stream, path))
+        periods.extend(b.interval for b in select_bookings(entries, args.resource))
+    except SelectionError as exc:
+        print(exc, file=stderr)
+        return 2
     except CalendarError as exc:
         print(exc, file=stderr)
         return 1

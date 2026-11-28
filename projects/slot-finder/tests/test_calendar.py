@@ -31,3 +31,12 @@ class CalendarTests(unittest.TestCase):
         cmd = ("free", "--calendar", "-", "--window", "09:00-10:00")
         self.assertEqual(run(*cmd, text="resource,start,end\nA,09:00,09:45"), (0, "09:45-10:00\n", ""))
         self.assertEqual(run(*cmd, "--calendar", "-")[0], 2)
+
+    def test_named_selection_does_not_remove_universal_manual_blocks(self):
+        from test_cli import run
+        data = "resource,start,end\nA,09:00,09:15\nB,09:30,09:45\n"
+        cmd = ("free", "--window", "09:00-10:00", "--calendar", "-", "--busy", "09:55-10:00")
+        self.assertEqual(run(*cmd, "--resource", "B", text=data)[1], "09:00-09:30\n09:45-09:55\n")
+        rc, out, err = run(*cmd, "--resource", "missing", text=data)
+        self.assertEqual((rc, out), (2, ""))
+        self.assertIn("unknown resource", err)
