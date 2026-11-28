@@ -37,11 +37,12 @@ jobs:
         if: matrix.compiler == 'g++'
         run: make -j2 test-ubsan
 
-  csv-cleaner:
+  python-projects:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python: ['3.9', '3.13']
+        project: [csv-cleaner, slot-finder]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,4 +50,4 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: make -C projects/csv-cleaner test demo
+      - run: make -C projects/${{ matrix.project }} test demo
