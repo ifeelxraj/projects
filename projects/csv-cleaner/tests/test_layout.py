@@ -17,3 +17,10 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(run(*args, text="a,mid,b\n1,2,3")[1], "a,b\r\n1,3\r\n")
         self.assertEqual(run(*args, text="a,mid,b\n1,3")[0], 1)
         self.assertEqual(run("clean", "--drop", "a", text="a\n1")[0], 2)
+
+    def test_renames_are_simultaneous_and_output_names_unique(self):
+        sample = "a,b\n1,2"
+        self.assertEqual(run("clean", "--rename", "a", "b", "--rename", "b", "a", text=sample)[1],
+                         "b,a\r\n1,2\r\n")
+        for args in [("--rename", "a", "b"), ("--drop", "b", "--rename", "b", "x")]:
+            self.assertEqual(run("clean", *args, text=sample)[:2], (2, ""))

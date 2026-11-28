@@ -16,7 +16,7 @@ class Layout:
         return tuple(fields[i] for i in self.indices)
 
 
-def compile_layout(header, *, keep=(), drop=()):
+def compile_layout(header, *, keep=(), drop=(), rename=()):
     positions = {name: i for i, name in enumerate(header)}
     if keep and drop:
         raise OptionError("choose either --keep or --drop")
@@ -31,4 +31,10 @@ def compile_layout(header, *, keep=(), drop=()):
     for name in names:
         if name not in positions:
             raise OptionError(f"unknown column: {name!r}")
-    return Layout(names, tuple(positions[name] for name in names))
+    mapping = dict(rename)
+    if len(mapping) != len(rename) or set(mapping).difference(names):
+        raise OptionError("repeated or unselected source name in --rename")
+    labels = tuple(mapping.get(name, name) for name in names)
+    if any(not label.strip() for label in labels) or len(set(labels)) != len(labels):
+        raise OptionError("renaming produces blank or duplicate output names")
+    return Layout(labels, tuple(positions[name] for name in names))
