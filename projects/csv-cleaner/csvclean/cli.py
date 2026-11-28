@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 
+from .profile import profile
 from .schema import rules_for
 from .transform import CellEdits
 from .layout import OptionError
@@ -57,6 +58,9 @@ def parser():
     clean.add_argument("--output-delimiter", choices=DIALECTS, default="comma")
     clean.add_argument("--replace", action="store_true", help="allow atomic replacement of a different file")
     clean.add_argument("-o", "--output", default="-", help="new output path or - for stdout")
+    stats = commands.add_parser("profile", help="summarize completeness without listing values")
+    source_options(stats)
+    rule_options(stats)
     template = commands.add_parser("schema", help="emit a starter schema from the header only")
     source_options(template)
     return root
@@ -78,6 +82,10 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
                 stdout.write("\n")
                 return 0
             options["rules"] = rules_for(args)
+            if args.command == "profile":
+                json.dump(profile(source, **options), stdout, ensure_ascii=False)
+                stdout.write("\n")
+                return 0
             if args.command == "clean":
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
                     clean_table(source, target, **options, output_delimiter=DIALECTS[args.output_delimiter],
