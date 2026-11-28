@@ -15,3 +15,6 @@ In Python, call `csvclean.reader.records(stream)` on a text file opened with
 
 From the shell: `python3 -m csvclean validate < input.csv`. It reports the
 number of data rows and columns, or exits with status 1 and a line diagnostic.
+
+`make demo` replays a fictional stock import and prints a summary to stderr.
+`make test` runs the unit, integration and subprocess checks.
