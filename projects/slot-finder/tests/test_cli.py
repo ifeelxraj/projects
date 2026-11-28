@@ -15,3 +15,7 @@ class FreeTests(unittest.TestCase):
         self.assertEqual(run("free"), (0, "09:00-17:00\n", ""))
         self.assertEqual(run("free", "--window", "10:00-12:00", "--busy", "10:15-11:00",
                              "--busy", "11:00-11:30")[1], "10:00-10:15\n11:30-12:00\n")
+
+    def test_minimum_free_block_is_inclusive(self):
+        self.assertEqual(run("free", "--window", "10:00-11:00", "--busy", "10:14-10:45", "--min", "15")[1],
+                         "10:45-11:00\n")

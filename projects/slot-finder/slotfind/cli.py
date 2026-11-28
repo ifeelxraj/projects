@@ -12,6 +12,13 @@ def interval_arg(text):
         raise argparse.ArgumentTypeError(str(exc)) from exc
 
 
+def positive_minutes(text):
+    value = int(text)
+    if not 1 <= value <= 1440:
+        raise argparse.ArgumentTypeError("expected 1 to 1440 minutes")
+    return value
+
+
 def schedule_options(cmd):
     cmd.add_argument("--window", type=interval_arg, default=span("09:00-17:00"), metavar="START-END")
     cmd.add_argument("--busy", type=interval_arg, action="append", default=[], metavar="START-END")
@@ -22,6 +29,7 @@ def parser():
     commands = root.add_subparsers(dest="command", required=True)
     free = commands.add_parser("free", help="list shared free blocks")
     schedule_options(free)
+    free.add_argument("--min", type=positive_minutes, default=1, metavar="MINUTES", help="minimum useful free block")
     return root
 
 
@@ -29,5 +37,6 @@ def main(argv=None, *, stdout=None, stderr=None):
     args = parser().parse_args(argv)
     stdout = sys.stdout if stdout is None else stdout
     for block in available(args.window, args.busy):
-        print(block, file=stdout)
+        if block.minutes >= args.min:
+            print(block, file=stdout)
     return 0
