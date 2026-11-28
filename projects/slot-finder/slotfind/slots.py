@@ -4,6 +4,8 @@ from .time import Span
 
 
 def candidates(gaps, duration, step, anchor=0):
+    if any(type(n) is not int for n in (duration, step, anchor)):
+        raise ValueError("duration, step and anchor must use whole minutes")
     if min(duration, step) <= 0:
         raise ValueError("duration and step must be positive")
     for gap in gaps:

@@ -43,3 +43,16 @@ class DurationTests(unittest.TestCase):
         for text in ("24h1m", "1h60m", "1.5h", "1:30", "-5", "2000m"):
             with self.assertRaises(ValueError):
                 duration_minutes(text)
+
+    def test_library_rejects_fractional_and_boolean_time_values_at_the_boundary(self):
+        from slotfind.time import Span
+        from slotfind.slots import candidates
+        for value in (True, 1.5):
+            with self.assertRaises(ValueError):
+                Span(value, 5)
+            with self.assertRaises(ValueError):
+                clock(value)
+            with self.assertRaises(ValueError):
+                Span(1, 5).padded(value, 0)
+            with self.assertRaises(ValueError):
+                list(candidates([Span(1, 5)], value, 1))

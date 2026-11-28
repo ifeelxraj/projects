@@ -18,7 +18,7 @@ def minute(text):
 
 
 def clock(value):
-    if not 0 <= value <= DAY:
+    if type(value) is not int or not 0 <= value <= DAY:
         raise ValueError("minutes outside day")
     return f"{value // 60:02d}:{value % 60:02d}"
 
@@ -29,6 +29,8 @@ class Span:
     end: int
 
     def __post_init__(self):
+        if type(self.start) is not int or type(self.end) is not int:
+            raise ValueError("interval endpoints must be whole minutes")
         if not 0 <= self.start < self.end <= DAY:
             raise ValueError("interval must start before its end within one day")
 
@@ -37,6 +39,8 @@ class Span:
         return self.end - self.start
 
     def padded(self, before=0, after=0):
+        if type(before) is not int or type(after) is not int:
+            raise ValueError("padding must be in whole minutes")
         if min(before, after) < 0:
             raise ValueError("padding cannot be negative")
         return Span(max(0, self.start - before), min(DAY, self.end + after))
