@@ -4,6 +4,9 @@ import csv
 from dataclasses import dataclass, field
 
 
+from .rules import Rules, apply_checks
+
+
 class Problem(ValueError):
     def __init__(self, message, first, last):
         self.message, self.first, self.last = message, first, last
@@ -62,12 +65,14 @@ def check_width(row, header):
 class Table:
     """A single-pass table. Ordinary iteration yields checked records only."""
 
-    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False):
+    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False, rules=Rules()):
         self.rows = records(stream, delimiter, skip_blank=skip_blank)
         self.header = read_header(self.rows, trim=trim_header)
+        self.checks = rules.bind(self.header)
 
     def check(self, row):
         check_width(row, self.header)
+        apply_checks(row, self.checks)
 
     def __iter__(self):
         for row in self.rows:

@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 
+from .rules import Rules
 from .transform import CellEdits
 from .layout import OptionError
 from .cleaner import clean_table
@@ -19,6 +20,10 @@ def source_options(command):
     command.add_argument("--delimiter", choices=DIALECTS, default="comma")
 
 
+def rule_options(command):
+    command.add_argument("--require", metavar="NAME", action="append", default=[], help="require a nonblank input value")
+
+
 def positive(text):
     value = int(text)
     if value < 1:
@@ -31,10 +36,12 @@ def parser():
     commands = root.add_subparsers(dest="command", required=True)
     check = commands.add_parser("validate", help="check the header and every row width")
     source_options(check)
+    rule_options(check)
     check.add_argument("--json", action="store_true", help="emit a structured report")
     check.add_argument("--max-errors", type=positive, default=1)
     clean = commands.add_parser("clean", help="write canonical CSV after checking each row")
     source_options(clean)
+    rule_options(clean)
     clean.add_argument("--rename", nargs=2, metavar=("OLD", "NEW"), action="append", default=[])
     selection = clean.add_mutually_exclusive_group()
     selection.add_argument("--drop", metavar="NAME", action="append", default=[], help="omit a named column")
@@ -55,7 +62,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
     options = dict(delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                   trim_header=args.trim_header)
+                   trim_header=args.trim_header, rules=Rules(required=tuple(args.require)))
     try:
         with input_stream(args.input, stdin) as source:
             if args.command == "clean":
