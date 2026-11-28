@@ -54,17 +54,17 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
     stdin = sys.stdin if stdin is None else stdin
     stdout = sys.stdout if stdout is None else stdout
     stderr = sys.stderr if stderr is None else stderr
+    options = dict(delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
+                   trim_header=args.trim_header)
     try:
         with input_stream(args.input, stdin) as source:
             if args.command == "clean":
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
-                    clean_table(source, target, delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                                output_delimiter=DIALECTS[args.output_delimiter], edits=CellEdits(args.trim, args.fill_empty, args.skip_empty),
-                                trim_header=args.trim_header, keep=args.keep, drop=args.drop, rename=args.rename,
-                                collapse=args.collapse_adjacent)
+                    clean_table(source, target, **options, output_delimiter=DIALECTS[args.output_delimiter],
+                                edits=CellEdits(args.trim, args.fill_empty, args.skip_empty),
+                                keep=args.keep, drop=args.drop, rename=args.rename, collapse=args.collapse_adjacent)
                 return 0
-            report = audit(source, DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                           max_errors=args.max_errors, trim_header=args.trim_header)
+            report = audit(source, **options, max_errors=args.max_errors)
     except Problem as exc:
         print(exc, file=stderr)
         return 1

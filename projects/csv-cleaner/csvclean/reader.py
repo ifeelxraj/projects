@@ -59,6 +59,22 @@ def check_width(row, header):
         raise row.problem(f"expected {len(header)} fields, found {len(row.fields)}")
 
 
+class Table:
+    """A single-pass table. Ordinary iteration yields checked records only."""
+
+    def __init__(self, stream, delimiter=",", *, skip_blank=False, trim_header=False):
+        self.rows = records(stream, delimiter, skip_blank=skip_blank)
+        self.header = read_header(self.rows, trim=trim_header)
+
+    def check(self, row):
+        check_width(row, self.header)
+
+    def __iter__(self):
+        for row in self.rows:
+            self.check(row)
+            yield row
+
+
 @dataclass
 class Report:
     header: tuple = ()
@@ -67,17 +83,17 @@ class Report:
     stopped: bool = False
 
 
-def audit(stream, delimiter=",", *, skip_blank=False, max_errors=1, trim_header=False):
+def audit(stream, delimiter=",", *, max_errors=1, **options):
     if max_errors < 1:
         raise ValueError("max_errors must be positive")
     result = Report()
     try:
-        rows = records(stream, delimiter, skip_blank=skip_blank)
-        result.header = read_header(rows, trim=trim_header)
-        for row in rows:
+        table = Table(stream, delimiter, **options)
+        result.header = table.header
+        for row in table.rows:
             result.examined += 1
             try:
-                check_width(row, result.header)
+                table.check(row)
             except Problem as exc:
                 result.problems.append(exc)
                 if len(result.problems) >= max_errors:
