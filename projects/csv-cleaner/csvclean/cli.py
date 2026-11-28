@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 
+from .transform import CellEdits
 from .layout import OptionError
 from .cleaner import clean_table
 from .streams import input_stream, output_stream
@@ -38,6 +39,7 @@ def parser():
     selection = clean.add_mutually_exclusive_group()
     selection.add_argument("--drop", metavar="NAME", action="append", default=[], help="omit a named column")
     selection.add_argument("--keep", metavar="NAME", action="append", default=[], help="keep a column in this order")
+    clean.add_argument("--fill-empty", metavar="TEXT", help="replace empty output cells after trimming")
     clean.add_argument("--trim", action="store_true", help="strip outer whitespace from data cells")
     clean.add_argument("--output-delimiter", choices=DIALECTS, default="comma")
     clean.add_argument("--replace", action="store_true", help="allow atomic replacement of a different file")
@@ -55,7 +57,7 @@ def main(argv=None, *, stdin=None, stdout=None, stderr=None):
             if args.command == "clean":
                 with output_stream(args.output, stdout, replace=args.replace, input_path=args.input) as target:
                     clean_table(source, target, delimiter=DIALECTS[args.delimiter], skip_blank=args.skip_blank,
-                                output_delimiter=DIALECTS[args.output_delimiter], trim=args.trim,
+                                output_delimiter=DIALECTS[args.output_delimiter], edits=CellEdits(args.trim, args.fill_empty),
                                 trim_header=args.trim_header, keep=args.keep, drop=args.drop, rename=args.rename)
                 return 0
             report = audit(source, DIALECTS[args.delimiter], skip_blank=args.skip_blank,

@@ -1,10 +1,11 @@
 import csv
 
+from .transform import CellEdits
 from .layout import compile_layout
 from .reader import check_width, read_header, records
 
 
-def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=",", trim=False, trim_header=False, keep=(), drop=(), rename=()):
+def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delimiter=",", edits=CellEdits(), trim_header=False, keep=(), drop=(), rename=()):
     rows = records(source, delimiter, skip_blank=skip_blank)
     header = read_header(rows, trim=trim_header)
     # CRLF also makes the standard writer quote cells containing a bare CR.
@@ -13,5 +14,4 @@ def clean_table(source, target, *, delimiter=",", skip_blank=False, output_delim
     writer.writerow(layout.names)
     for row in rows:
         check_width(row, header)
-        values = tuple(cell.strip() for cell in row.fields) if trim else row.fields
-        writer.writerow(layout.select(values))
+        writer.writerow(edits.apply(layout.select(row.fields)))

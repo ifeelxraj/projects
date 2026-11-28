@@ -24,3 +24,9 @@ class LayoutTests(unittest.TestCase):
                          "b,a\r\n1,2\r\n")
         for args in [("--rename", "a", "b"), ("--drop", "b", "--rename", "b", "x")]:
             self.assertEqual(run("clean", *args, text=sample)[:2], (2, ""))
+
+    def test_fill_only_changes_empty_values_after_optional_trimming(self):
+        sample = "a,b\n ,0\n,word"
+        self.assertEqual(run("clean", "--fill-empty", "NA", text=sample)[1], "a,b\r\n ,0\r\nNA,word\r\n")
+        self.assertEqual(run("clean", "--trim", "--fill-empty", "NA", text=sample)[1],
+                         "a,b\r\nNA,0\r\nNA,word\r\n")
