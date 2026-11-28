@@ -32,3 +32,6 @@ cleaning order and atomic output files.
 Run `python3 tools/run_brief.py` for the current index, recent history and daily
 handoffs. The [contributor guide](CONTRIBUTING.md) explains the check, commit,
 stop and logging process. Dated run notes live in `logs/`.
+
+Run `make test` at the repository root to check the catalog, contributor tools,
+and all completed projects together.
