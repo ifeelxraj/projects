@@ -30,3 +30,9 @@ class SchemaTests(unittest.TestCase):
             self.assertEqual(self.check(schema, header)[0], 1)
         self.assertEqual(self.check(schema, " a ,b", "--trim-header")[0], 0)
         self.assertEqual(self.check({"version": 1, "columns": []}, "x")[0], 2)
+
+    def test_generated_template_round_trips_without_sampling_values(self):
+        rc, out, err = run("schema", text="id,city\nnot,sampled,here\n")
+        self.assertEqual((rc, err), (0, ""))
+        self.assertNotIn("sampled", out)
+        self.assertEqual(self.check(json.loads(out), "id,city\n1,Demo")[0], 0)
