@@ -70,3 +70,8 @@ class CleanerTests(unittest.TestCase):
         rc, out, err = run("clean", text="a,b\n1,2\n3\n")
         self.assertEqual((rc, out), (1, "a,b\r\n1,2\r\n"))
         self.assertIn("line 3", err)
+
+    def test_transcodes_separators_and_requotes_the_new_separator(self):
+        rc, out, _ = run("clean", "--delimiter", "semicolon", "--output-delimiter", "tab",
+                         text='key;note\na;"x;y"\nb;has\ttab\n')
+        self.assertEqual((rc, out), (0, 'key\tnote\r\na\tx;y\r\nb\t"has\ttab"\r\n'))
