@@ -21,3 +21,17 @@ class GapTests(unittest.TestCase):
                          [Span(20, 30), Span(40, 60)])
         self.assertEqual(available(window, [Span(5, 25), Span(50, 70)]), [Span(25, 50)])
         self.assertEqual(available(window, [Span(0, 90)]), [])
+
+    def test_gap_algorithm_agrees_with_a_minute_occupancy_oracle(self):
+        import random
+        from slotfind.availability import available
+        rng = random.Random(137)
+        for _ in range(300):
+            window = Span(*sorted(rng.sample(range(61), 2)))
+            busy = [Span(*sorted(rng.sample(range(61), 2))) for _ in range(rng.randrange(10))]
+            expected = {m for m in range(window.start, window.end)
+                        if not any(b.start <= m < b.end for b in busy)}
+            gaps = available(window, busy)
+            self.assertEqual({m for gap in gaps for m in range(gap.start, gap.end)}, expected)
+            self.assertEqual(sum(g.minutes for g in gaps), len(expected))
+            self.assertTrue(all(x.end < y.start for x, y in zip(gaps, gaps[1:])))
